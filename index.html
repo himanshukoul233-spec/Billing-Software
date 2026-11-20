@@ -208,17 +208,18 @@ $("registerForm").addEventListener("submit", async e => {
     }
 
     const { data, error } = await supabaseClient.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          shop_name: shopName,
-          owner_name: ownerName,
-          phone,
-          username
-        }
-      }
-    });
+  email,
+  password,
+  options: {
+    emailRedirectTo: "https://himanshukoul233-spec.github.io/Billing-Software/",
+    data: {
+      shop_name: shopName,
+      owner_name: ownerName,
+      phone,
+      username
+    }
+  }
+});
 
     if (error) throw error;
 
