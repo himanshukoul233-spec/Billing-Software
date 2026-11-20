@@ -63,7 +63,7 @@ $('registerForm').addEventListener('submit', async e => {
       }
     });
 
-    if (error) throw error;
+    console.log("SUPABASE REGISTER ERROR:", error);
 
     msg(
       'registerMsg',
