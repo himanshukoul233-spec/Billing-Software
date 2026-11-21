@@ -155,7 +155,7 @@ function showDashboard(profile) {
 
 
 async function loadProfile(user) {
-  console.log("Logged-in User ID:", user.id);
+  console.log("Logged-in Email:", user.email);
 
   const { data, error } = await supabaseClient
     .from("shop_profiles")
