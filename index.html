@@ -154,33 +154,34 @@ function showDashboard(profile) {
 }
 
 
+
 async function loadProfile(user) {
-  console.log("Logged-in Email:", user.email);
+  const { data: sessionData } =
+    await supabaseClient.auth.getSession();
+
+  const currentUser = sessionData.session?.user;
+
+  console.log("User:", currentUser?.id);
+  console.log("Email:", currentUser?.email);
 
   const { data, error } = await supabaseClient
     .from("shop_profiles")
-    .select("*")
-    .eq("id", user.id);
-
-  console.log("Profile Data:", data);
-  console.log("Profile Error:", error);
+    .select("id,email,shop_name,status")
+    .eq("id", currentUser.id);
 
   if (error) {
-    throw new Error("Profile database error: " + error.message);
+    throw new Error("DATABASE ERROR: " + error.message);
   }
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Profile not visible. Check Supabase RLS policies."
+      "NO PROFILE FOUND FOR: " + currentUser.email
     );
-  }
-
-  if (data.length > 1) {
-    throw new Error("Multiple shop profiles found.");
   }
 
   showDashboard(data[0]);
 }
+
 
 // SHOP REGISTRATION
 
