@@ -1,4 +1,4 @@
-  
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,367 +11,66 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f1f5f9;font-family:Arial,sans-serif;color:#172033}
-header{background:#172554;color:white;padding:20px;text-align:center}
-header h1{margin:0;font-size:25px}
-header p{margin:7px 0 0;color:#cbd5e1}
-.container{max-width:480px;margin:25px auto;padding:12px}
-.card{background:white;padding:22px;border-radius:15px;margin-bottom:15px;box-shadow:0 3px 15px #0000000d}
-h2{margin-top:0;font-size:21px}
-label{display:block;margin:13px 0 6px;font-size:14px}
-input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px}
-button{padding:12px;border:0;border-radius:8px;background:#2563eb;color:white;font-size:15px;font-weight:bold;width:100%;margin-top:15px}
-button.secondary{background:#e2e8f0;color:#172554}
-button:disabled{opacity:.6}
-.msg{font-size:14px;line-height:1.5;margin-top:12px;overflow-wrap:anywhere}
-.hidden{display:none}
-.muted{color:#64748b;font-size:13px}
-.status{background:#fef3c7;color:#92400e;padding:12px;border-radius:8px;margin-top:15px}
-</style>
-</head>
-
-<body>
-
-<header>
-<h1>Vyapar Book</h1>
-<p>Smart Billing & Shop Management</p>
-</header>
-
-<div class="container">
-
-<section id="authView">
-
-<div class="card">
-<h2>Login</h2>
-<p class="muted">Login to your shop account</p>
-
-<form id="loginForm">
-<label>Email</label>
-<input type="email" name="email" required>
-
-<label>Password</label>
-<input type="password" name="password" required>
-
-<button id="loginBtn" type="submit">Login</button>
-</form>
-
-<p id="loginMsg" class="msg"></p>
-</div>
-
-<div class="card">
-<h2>Register Your Shop</h2>
-<p class="muted">Create your Vyapar Book account</p>
-
-<form id="registerForm">
-
-<label>Shop Name *</label>
-<input name="shopName" maxlength="150" required>
-
-<label>Owner Name *</label>
-<input name="ownerName" maxlength="150" required>
-
-<label>Email *</label>
-<input name="email" type="email" required>
-
-<label>Mobile Number</label>
-<input name="phone" type="tel" maxlength="15">
-
-<label>Username *</label>
-<input name="username" maxlength="100" required>
-
-<label>Password (minimum 12 characters) *</label>
-<input name="password" type="password" minlength="12" required>
-
-<button id="registerBtn" type="submit">Register Shop</button>
-
-</form>
-
-<p id="registerMsg" class="msg"></p>
-</div>
-
-</section>
-
-<section id="shopView" class="hidden">
-
-<div class="card">
-<h2>Welcome to Vyapar Book</h2>
-<p id="shopName"></p>
-<p id="shopEmail" class="muted"></p>
-
-<div class="status" id="shopStatus">
-Your registration is pending approval.
-</div>
-
-<button class="secondary" id="logoutBtn">Logout</button>
-</div>
-
-</section>
-
-</div>
-
-<script>
-const SUPABASE_URL =
-"https://fhxyeccekxbwergdwthx.supabase.co";
-
-const SUPABASE_KEY =
-"sb_publishable_Zu3FsfPnBuhjh9l_4TfWYw_v7-MWH62";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-const $ = id => document.getElementById(id);
-
-function message(id, text, success=false) {
-  const el = $(id);
-  el.textContent = text;
-  el.style.color = success ? "green" : "#b91c1c";
-}
-
-function showDashboard(profile) {
-  $("authView").classList.add("hidden");
-  $("shopView").classList.remove("hidden");
-
-  $("shopName").textContent =
-    profile.shop_name + " · " + profile.owner_name;
-
-  $("shopEmail").textContent = profile.email;
-
-  const status = $("shopStatus");
-
-  if (profile.status === "active") {
-    status.textContent = "Your shop account is active.";
-    status.style.background = "#dcfce7";
-    status.style.color = "#166534";
-  } else if (profile.status === "suspended") {
-    status.textContent = "Your shop account is suspended. Contact administrator.";
-    status.style.background = "#fee2e2";
-    status.style.color = "#991b1b";
-  } else {
-    status.textContent = "Registration successful! Waiting for admin approval.";
-  }
-}
-
-
-
-async function loadProfile(user) {
-  const { data: sessionData } =
-    await supabaseClient.auth.getSession();
-
-  const currentUser = sessionData.session?.user;
-
-  console.log("User:", currentUser?.id);
-  console.log("Email:", currentUser?.email);
-
-  const { data, error } = await supabaseClient
-    .from("shop_profiles")
-    .select("id,email,shop_name,status")
-    .eq("id", currentUser.id);
-
-  if (error) {
-    throw new Error("DATABASE ERROR: " + error.message);
-  }
-
-  if (!data || data.length === 0) {
-    throw new Error(
-      "NO PROFILE FOUND FOR: " + currentUser.email
-    );
-  }
-
-  showDashboard(data[0]);
-}
-
-
-// SHOP REGISTRATION
-
-$("registerForm").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const btn = $("registerBtn");
-  btn.disabled = true;
-  btn.textContent = "Registering...";
-
-  message("registerMsg", "");
-
-  const f = new FormData(e.target);
-
-  const shopName = f.get("shopName").trim();
-  const ownerName = f.get("ownerName").trim();
-  const email = f.get("email").trim();
-  const phone = f.get("phone").trim();
-  const username = f.get("username").trim().toLowerCase();
-  const password = f.get("password");
-
-  try {
-    if (!shopName || !ownerName || !email || !username || !password) {
-      throw new Error("Please fill all required fields.");
-    }
-
-    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
-      throw new Error("Username must be 3-30 characters (letters, numbers or underscore).");
-    }
-
-    if (password.length < 12) {
-      throw new Error("Password must have at least 12 characters.");
-    }
-
-    const { data, error } = await supabaseClient.auth.signUp({
-  email,
-  password,
-  options: {
-    emailRedirectTo: "https://himanshukoul233-spec.github.io/Billing-Software/",
-    data: {
-      shop_name: shopName,
-      owner_name: ownerName,
-      phone,
-      username
-    }
-  }
-});
-
-    if (error) throw error;
-
-    e.target.reset();
-
-    if (data.session && data.user) {
-      await loadProfile(data.user);
-      message("registerMsg", "Registration successful!", true);
-    } else {
-      message(
-        "registerMsg",
-        "Registration successful! Please verify your email using the link sent to your inbox.",
-        true
-      );
-    }
-
-  } catch (err) {
-    message("registerMsg", err.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Register Shop";
-  }
-});
-
-// SHOP LOGIN
-
-$("loginForm").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const btn = $("loginBtn");
-  btn.disabled = true;
-  btn.textContent = "Logging in...";
-
-  message("loginMsg", "");
-
-  const f = new FormData(e.target);
-
-  try {
-    const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
-        email: f.get("email").trim(),
-        password: f.get("password")
-      });
-
-    if (error) throw error;
-
-    await loadProfile(data.user);
-
-  } catch (err) {
-    message("loginMsg", err.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Login";
-  }
-});
-
-// LOGOUT
-
-$("logoutBtn").addEventListener("click", async () => {
-  const { error } = await supabaseClient.auth.signOut();
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  showLogin();
-});
-
-// EXISTING LOGIN SESSION
-
-(async () => {
-  const { data, error } = await supabaseClient.auth.getSession();
-
-  if (error) {
-    message("loginMsg", error.message);
-    return;
-  }
-
-  if (data.session) {
-    try {
-      await loadProfile(data.session.user);
-    } catch (err) {
-      message("loginMsg", err.message);
-    }
-  }
-})();
-
-</script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#172554">
-<title>Vyapar Book - Shop Management</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-*{box-sizing:border-box}
 body{
- margin:0;background:#f1f5f9;
- font-family:Arial,sans-serif;color:#172033
+  margin:0;
+  background:#f1f5f9;
+  font-family:Arial,sans-serif;
+  color:#172033;
 }
 header{
- background:#172554;color:white;padding:24px 15px;
- text-align:center
+  background:#172554;
+  color:white;
+  padding:24px 15px;
+  text-align:center;
 }
 header h1{margin:0;font-size:28px}
 header p{margin:8px 0 0;color:#cbd5e1}
 .container{max-width:480px;margin:25px auto;padding:12px}
 .card{
- background:white;padding:22px;border-radius:16px;
- margin-bottom:16px;box-shadow:0 3px 15px #0000000d
+  background:white;
+  padding:22px;
+  border-radius:16px;
+  margin-bottom:16px;
+  box-shadow:0 3px 15px #0000000d;
 }
 h2{margin-top:0;font-size:22px}
 label{display:block;margin:13px 0 6px;font-size:14px}
 input{
- width:100%;padding:13px;border:1px solid #cbd5e1;
- border-radius:9px;font-size:15px
+  width:100%;
+  padding:13px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  font-size:15px;
 }
 button{
- padding:13px;border:0;border-radius:9px;
- background:#2563eb;color:white;font-size:15px;
- font-weight:bold;width:100%;margin-top:14px;
- cursor:pointer
+  padding:13px;
+  border:0;
+  border-radius:9px;
+  background:#2563eb;
+  color:white;
+  font-size:15px;
+  font-weight:bold;
+  width:100%;
+  margin-top:14px;
+  cursor:pointer;
 }
 button.secondary{background:#e2e8f0;color:#172554}
-button.link{
- background:transparent;color:#2563eb;
- padding:8px;margin-top:8px
-}
+button.link{background:transparent;color:#2563eb;padding:8px}
 button:disabled{opacity:.6}
-.msg{font-size:14px;line-height:1.5;margin-top:12px;overflow-wrap:anywhere}
+.msg{
+  font-size:14px;
+  line-height:1.5;
+  margin-top:12px;
+  overflow-wrap:anywhere;
+}
 .hidden{display:none!important}
 .muted{color:#64748b;font-size:13px}
 .status{
- background:#fef3c7;color:#92400e;
- padding:13px;border-radius:9px;margin-top:15px
+  background:#fef3c7;
+  color:#92400e;
+  padding:13px;
+  border-radius:9px;
+  margin-top:15px;
 }
 </style>
 </head>
@@ -379,121 +78,145 @@ button:disabled{opacity:.6}
 <body>
 
 <header>
-<h1>Vyapar Book</h1>
-<p>Smart Billing & Shop Management</p>
+  <h1>Vyapar Book</h1>
+  <p>Smart Billing & Shop Management</p>
 </header>
 
 <div class="container">
 
-<!-- LOGIN AND REGISTRATION -->
+<!-- LOGIN -->
+<section id="loginView">
+  <div class="card">
+    <h2>Login</h2>
+    <p class="muted">Login to your shop account</p>
 
-<section id="authView">
+    <form id="loginForm">
+      <label>Email</label>
+      <input type="email" name="email" autocomplete="email" required>
 
-<div class="card">
-<h2>Login</h2>
-<p class="muted">Login to your shop account</p>
+      <label>Password</label>
+      <input type="password" name="password"
+      autocomplete="current-password" required>
 
-<form id="loginForm">
-<label>Email</label>
-<input type="email" name="email" autocomplete="email" required>
+      <button id="loginBtn" type="submit">Login</button>
+    </form>
 
-<label>Password</label>
-<input type="password" name="password"
-autocomplete="current-password" required>
+    <button class="link" type="button" id="forgotBtn">
+      Forgot Password?
+    </button>
 
-<button id="loginBtn" type="submit">Login</button>
-</form>
+    <p id="loginMsg" class="msg"></p>
+  </div>
 
-<button class="link" type="button" id="forgotBtn">
-Forgot Password?
-</button>
-
-<p id="loginMsg" class="msg"></p>
-</div> 
-<button type="button" class="secondary" onclick="document.getElementById('registerCard').classList.toggle('hidden')">Register Your Shop</button>
-<div class="card hidden" id="registerCard">
-<h2>Register Your Shop</h2>
-<p class="muted">Create your Vyapar Book account</p>
-
-<form id="registerForm">
-
-<label>Shop Name *</label>
-<input name="shopName" maxlength="150" required>
-
-<label>Owner Name *</label>
-<input name="ownerName" maxlength="150" required>
-
-<label>Email *</label>
-<input name="email" type="email" autocomplete="email" required>
-
-<label>Mobile Number</label>
-<input name="phone" type="tel" maxlength="15">
-
-<label>Username *</label>
-<input name="username" maxlength="30" required>
-
-<label>Password (minimum 12 characters) *</label>
-<input name="password" type="password"
-autocomplete="new-password" minlength="12" required>
-
-<button id="registerBtn" type="submit">Register Shop</button>
-</form>
-
-<p id="registerMsg" class="msg"></p>
-</div>
-
+  <button type="button" id="showRegisterBtn">
+    Register Your Shop
+  </button>
 </section>
 
-<!-- PASSWORD RESET -->
+<!-- REGISTRATION -->
+<section id="registerView" class="hidden">
+  <div class="card">
+    <h2>Register Your Shop</h2>
+    <p class="muted">Create your Vyapar Book account</p>
 
+    <form id="registerForm">
+      <label>Shop Name *</label>
+      <input name="shopName" maxlength="150" required>
+
+      <label>Owner Name *</label>
+      <input name="ownerName" maxlength="150" required>
+
+      <label>Email *</label>
+      <input name="email" type="email" autocomplete="email" required>
+
+      <label>Mobile Number</label>
+      <input name="phone" type="tel" maxlength="15">
+
+      <label>Username *</label>
+      <input name="username" maxlength="30" required>
+
+      <label>Password (minimum 12 characters) *</label>
+      <input name="password" type="password"
+      minlength="12" autocomplete="new-password" required>
+
+      <button id="registerBtn" type="submit">Register Shop</button>
+    </form>
+
+    <p id="registerMsg" class="msg"></p>
+
+    <button class="link" type="button" id="backLoginBtn">
+      Back to Login
+    </button>
+  </div>
+</section>
+
+<!-- FORGOT PASSWORD -->
+<section id="forgotView" class="hidden">
+  <div class="card">
+    <h2>Forgot Password</h2>
+    <p class="muted">Enter your registered email address.</p>
+
+    <form id="forgotForm">
+      <label>Email</label>
+      <input id="forgotEmail" type="email" required>
+
+      <button id="forgotSendBtn" type="submit">
+        Send Reset Link
+      </button>
+    </form>
+
+    <p id="forgotMsg" class="msg"></p>
+
+    <button class="link" type="button" id="forgotBackBtn">
+      Back to Login
+    </button>
+  </div>
+</section>
+
+<!-- RESET PASSWORD -->
 <section id="resetView" class="hidden">
-<div class="card">
-<h2>Create New Password</h2>
-<p class="muted">Enter and confirm your new password.</p>
+  <div class="card">
+    <h2>Create New Password</h2>
+    <p class="muted">Enter and confirm your new password.</p>
 
-<form id="resetForm">
-<label>New Password</label>
-<input id="newPassword" type="password"
-minlength="12" autocomplete="new-password" required>
+    <form id="resetForm">
+      <label>New Password</label>
+      <input id="newPassword" type="password"
+      minlength="12" autocomplete="new-password" required>
 
-<label>Confirm New Password</label>
-<input id="confirmPassword" type="password"
-minlength="12" autocomplete="new-password" required>
+      <label>Confirm New Password</label>
+      <input id="confirmPassword" type="password"
+      minlength="12" autocomplete="new-password" required>
 
-<button id="updatePasswordBtn" type="submit">
-Update Password
-</button>
-</form>
+      <button id="updatePasswordBtn" type="submit">
+        Update Password
+      </button>
+    </form>
 
-<p id="resetMsg" class="msg"></p>
-</div>
+    <p id="resetMsg" class="msg"></p>
+  </div>
 </section>
 
-<!-- SHOP DASHBOARD -->
-
+<!-- DASHBOARD -->
 <section id="shopView" class="hidden">
-<div class="card">
-<h2>Welcome to Vyapar Book</h2>
-<p id="shopName"></p>
-<p id="shopEmail" class="muted"></p>
+  <div class="card">
+    <h2>Welcome to Vyapar Book</h2>
+    <p id="shopName"></p>
+    <p id="shopEmail" class="muted"></p>
 
-<div class="status" id="shopStatus">
-Your shop account is active.
-</div>
+    <div class="status" id="shopStatus">
+      Your shop account is active.
+    </div>
 
-<button class="secondary" id="logoutBtn">
-Logout
-</button>
-</div>
+    <button class="secondary" id="logoutBtn">Logout</button>
+  </div>
 </section>
 
 </div>
 
 <script>
 
-// ==================================
 // SUPABASE CONNECTION
-// ==================================
 
 const SUPABASE_URL =
 "https://fhxyeccekxbwergdwthx.supabase.co";
@@ -505,404 +228,374 @@ const APP_URL =
 "https://himanshukoul233-spec.github.io/Billing-Software/";
 
 const supabaseClient = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true
+    }
+  }
 );
 
 const $ = id => document.getElementById(id);
 
 let recoveryMode =
-new URLSearchParams(location.hash.substring(1)).get("type")
-=== "recovery";
+  new URLSearchParams(location.hash.substring(1)).get("type")
+  === "recovery";
 
-// ==================================
 // COMMON FUNCTIONS
-// ==================================
 
 function message(id,text,success=false){
-const el=$(id);
-el.textContent=text;
-el.style.color=success?"#15803d":"#b91c1c";
+  const el=$(id);
+  el.textContent=text;
+  el.style.color=success?"#15803d":"#b91c1c";
+}
+
+function showScreen(screen){
+  [
+    "loginView",
+    "registerView",
+    "forgotView",
+    "resetView",
+    "shopView"
+  ].forEach(id=>{
+    $(id).classList.add("hidden");
+  });
+
+  $(screen).classList.remove("hidden");
 }
 
 function showLogin(){
-$("authView").classList.remove("hidden");
-$("shopView").classList.add("hidden");
-$("resetView").classList.add("hidden");
+  showScreen("loginView");
 }
-
-function showReset(){
-$("authView").classList.add("hidden");
-$("shopView").classList.add("hidden");
-$("resetView").classList.remove("hidden");
-}
-
-// ==================================
-// SHOP DASHBOARD
-// ==================================
 
 function showDashboard(profile,user){
+  showScreen("shopView");
 
-$("authView").classList.add("hidden");
-$("resetView").classList.add("hidden");
-$("shopView").classList.remove("hidden");
+  const shop=profile.shop_name || "My Shop";
+  const owner=
+    profile.owner_name ||
+    user.user_metadata?.owner_name ||
+    "Shop Owner";
 
-const shop = profile.shop_name || "My Shop";
-const owner =
-profile.owner_name ||
-user.user_metadata?.owner_name ||
-"Shop Owner";
+  $("shopName").textContent=shop+" · "+owner;
+  $("shopEmail").textContent=profile.email || user.email;
 
-$("shopName").textContent=shop+" · "+owner;
-$("shopEmail").textContent=profile.email || user.email;
+  const status=$("shopStatus");
 
-const status=$("shopStatus");
-
-if(profile.status==="active"){
-status.textContent="Your shop account is active.";
-status.style.background="#dcfce7";
-status.style.color="#166534";
-}
-else if(profile.status==="suspended"){
-status.textContent="Your shop account is suspended. Contact administrator.";
-status.style.background="#fee2e2";
-status.style.color="#991b1b";
-}
-else{
-status.textContent="Registration successful! Waiting for admin approval.";
-status.style.background="#fef3c7";
-status.style.color="#92400e";
-}
+  if(profile.status==="active"){
+    status.textContent="Your shop account is active.";
+    status.style.background="#dcfce7";
+    status.style.color="#166534";
+  }else if(profile.status==="suspended"){
+    status.textContent="Your shop account is suspended. Contact administrator.";
+    status.style.background="#fee2e2";
+    status.style.color="#991b1b";
+  }else{
+    status.textContent="Registration successful! Waiting for admin approval.";
+    status.style.background="#fef3c7";
+    status.style.color="#92400e";
+  }
 }
 
-// ==================================
-// LOAD SHOP PROFILE
-// ==================================
+// LOAD PROFILE
 
 async function loadProfile(user){
+  if(!user || !user.id){
+    throw new Error("Login session not found.");
+  }
 
-if(!user || !user.id){
-throw new Error("Login session not found.");
+  let {data,error}=await supabaseClient
+    .from("shop_profiles")
+    .select("id,email,shop_name,owner_name,status")
+    .eq("id",user.id)
+    .maybeSingle();
+
+  if(error){
+    const result=await supabaseClient
+      .from("shop_profiles")
+      .select("id,email,shop_name,status")
+      .eq("id",user.id)
+      .maybeSingle();
+
+    data=result.data;
+    error=result.error;
+  }
+
+  if(error){
+    throw new Error("Profile database error: "+error.message);
+  }
+
+  if(!data){
+    throw new Error("Shop profile not found. Please contact administrator.");
+  }
+
+  showDashboard(data,user);
 }
 
-let {data,error}=await supabaseClient
-.from("shop_profiles")
-.select("id,email,shop_name,owner_name,status")
-.eq("id",user.id)
-.maybeSingle();
+// OPEN REGISTRATION
 
-// Fallback if owner_name column is not present
-if(error){
-const result=await supabaseClient
-.from("shop_profiles")
-.select("id,email,shop_name,status")
-.eq("id",user.id)
-.maybeSingle();
+$("showRegisterBtn").addEventListener("click",()=>{
+  showScreen("registerView");
+});
 
-data=result.data;
-error=result.error;
-}
+$("backLoginBtn").addEventListener("click",showLogin);
 
-if(error){
-throw new Error("Profile database error: "+error.message);
-}
-
-if(!data){
-throw new Error(
-"Shop profile not found. Please contact administrator."
-);
-}
-
-showDashboard(data,user);
-}
-
-// ==================================
 // REGISTRATION
-// ==================================
 
 $("registerForm").addEventListener("submit",async e=>{
+  e.preventDefault();
 
-e.preventDefault();
+  const btn=$("registerBtn");
+  btn.disabled=true;
+  btn.textContent="Registering...";
 
-const btn=$("registerBtn");
-btn.disabled=true;
-btn.textContent="Registering...";
+  message("registerMsg","");
 
-message("registerMsg","");
+  const f=new FormData(e.target);
 
-const f=new FormData(e.target);
+  const shopName=f.get("shopName").trim();
+  const ownerName=f.get("ownerName").trim();
+  const email=f.get("email").trim().toLowerCase();
+  const phone=f.get("phone").trim();
+  const username=f.get("username").trim().toLowerCase();
+  const password=f.get("password");
 
-const shopName=f.get("shopName").trim();
-const ownerName=f.get("ownerName").trim();
-const email=f.get("email").trim().toLowerCase();
-const phone=f.get("phone").trim();
-const username=f.get("username").trim().toLowerCase();
-const password=f.get("password");
+  try{
+    if(!shopName || !ownerName || !email || !username || !password){
+      throw new Error("Please fill all required fields.");
+    }
 
-try{
+    if(!/^[a-z0-9_]{3,30}$/.test(username)){
+      throw new Error("Username must be 3-30 characters: letters, numbers or underscore.");
+    }
 
-if(!/^[a-z0-9_]{3,30}$/.test(username)){
-throw new Error(
-"Username must be 3-30 characters: letters, numbers or underscore."
-);
-}
+    if(password.length<12){
+      throw new Error("Password must have at least 12 characters.");
+    }
 
-if(password.length<12){
-throw new Error("Password must have at least 12 characters.");
-}
+    const {data,error}=await supabaseClient.auth.signUp({
+      email,
+      password,
+      options:{
+        emailRedirectTo:APP_URL,
+        data:{
+          shop_name:shopName,
+          owner_name:ownerName,
+          phone:phone,
+          username:username
+        }
+      }
+    });
 
-const {data,error}=await supabaseClient.auth.signUp({
-email,
-password,
-options:{
-emailRedirectTo:APP_URL,
-data:{
-shop_name:shopName,
-owner_name:ownerName,
-phone:phone,
-username:username
-}
-}
+    if(error) throw error;
+
+    if(data.session && data.user){
+      await loadProfile(data.user);
+      message("registerMsg","Registration successful!",true);
+    }else{
+      message(
+        "registerMsg",
+        "Registration successful! Please check your email for verification.",
+        true
+      );
+    }
+
+    e.target.reset();
+
+  }catch(err){
+    message("registerMsg",err.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Register Shop";
+  }
 });
 
-if(error) throw error;
-
-if(data.session && data.user){
-
-await loadProfile(data.user);
-message("registerMsg","Registration successful!",true);
-
-}else{
-
-message(
-"registerMsg",
-"Registration successful! Please check your email for verification.",
-true
-);
-
-}
-
-e.target.reset();
-
-}catch(err){
-message("registerMsg",err.message);
-}finally{
-btn.disabled=false;
-btn.textContent="Register Shop";
-}
-
-});
-
-// ==================================
 // LOGIN
-// ==================================
 
 $("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
 
-e.preventDefault();
+  const btn=$("loginBtn");
+  btn.disabled=true;
+  btn.textContent="Logging in...";
 
-const btn=$("loginBtn");
-btn.disabled=true;
-btn.textContent="Logging in...";
+  message("loginMsg","");
 
-message("loginMsg","");
+  const f=new FormData(e.target);
 
-const f=new FormData(e.target);
+  try{
+    const {data,error}=await supabaseClient.auth.signInWithPassword({
+      email:f.get("email").trim().toLowerCase(),
+      password:f.get("password")
+    });
 
-try{
+    if(error) throw error;
 
-const {data,error}=await supabaseClient.auth.signInWithPassword({
-email:f.get("email").trim().toLowerCase(),
-password:f.get("password")
+    await loadProfile(data.user);
+
+  }catch(err){
+    message("loginMsg",err.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Login";
+  }
 });
 
-if(error) throw error;
+// OPEN FORGOT PASSWORD
 
-await loadProfile(data.user);
+$("forgotBtn").addEventListener("click",()=>{
+  $("forgotEmail").value=
+    document.querySelector('#loginForm input[name="email"]').value.trim();
 
-}catch(err){
-message("loginMsg",err.message);
-}finally{
-btn.disabled=false;
-btn.textContent="Login";
-}
-
+  message("forgotMsg","");
+  showScreen("forgotView");
 });
 
-// ==================================
-// FORGOT PASSWORD
-// ==================================
+$("forgotBackBtn").addEventListener("click",showLogin);
 
-$("forgotBtn").addEventListener("click",async()=>{
+// SEND RESET EMAIL
 
-const email=document.querySelector(
-'#loginForm input[name="email"]'
-).value.trim().toLowerCase();
+$("forgotForm").addEventListener("submit",async e=>{
+  e.preventDefault();
 
-if(!email){
-message("loginMsg","Please enter your email first.");
-return;
-}
+  const btn=$("forgotSendBtn");
+  btn.disabled=true;
+  btn.textContent="Sending...";
 
-const btn=$("forgotBtn");
-btn.disabled=true;
-btn.textContent="Sending recovery email...";
+  message("forgotMsg","");
 
-try{
+  try{
+    const email=$("forgotEmail").value.trim().toLowerCase();
 
-const {error}=await supabaseClient.auth.resetPasswordForEmail(
-email,
-{
-redirectTo:APP_URL
-}
-);
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(
+      email,
+      {redirectTo:APP_URL}
+    );
 
-if(error) throw error;
+    if(error) throw error;
 
-message(
-"loginMsg",
-"Password recovery email sent. Check your Inbox and Spam folder.",
-true
-);
+    message(
+      "forgotMsg",
+      "Recovery email sent. Please check your Inbox and Spam folder.",
+      true
+    );
 
-}catch(err){
-message("loginMsg",err.message);
-}finally{
-btn.disabled=false;
-btn.textContent="Forgot Password?";
-}
-
+  }catch(err){
+    message("forgotMsg",err.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Send Reset Link";
+  }
 });
 
-// ==================================
 // PASSWORD RECOVERY EVENT
-// ==================================
 
 supabaseClient.auth.onAuthStateChange((event,session)=>{
-
-if(event==="PASSWORD_RECOVERY"){
-
-recoveryMode=true;
-showReset();
-
-}
-
+  if(event==="PASSWORD_RECOVERY"){
+    recoveryMode=true;
+    showScreen("resetView");
+  }
 });
 
-// ==================================
-// UPDATE NEW PASSWORD
-// ==================================
+// UPDATE PASSWORD
 
 $("resetForm").addEventListener("submit",async e=>{
+  e.preventDefault();
 
-e.preventDefault();
+  const password=$("newPassword").value;
+  const confirm=$("confirmPassword").value;
 
-const password=$("newPassword").value;
-const confirm=$("confirmPassword").value;
+  const btn=$("updatePasswordBtn");
 
-const btn=$("updatePasswordBtn");
+  if(password.length<12){
+    message("resetMsg","Password must have at least 12 characters.");
+    return;
+  }
 
-if(password.length<12){
-message("resetMsg","Password must have at least 12 characters.");
-return;
-}
+  if(password!==confirm){
+    message("resetMsg","Passwords do not match.");
+    return;
+  }
 
-if(password!==confirm){
-message("resetMsg","Passwords do not match.");
-return;
-}
+  btn.disabled=true;
+  btn.textContent="Updating...";
 
-btn.disabled=true;
-btn.textContent="Updating...";
+  try{
+    const {error}=await supabaseClient.auth.updateUser({
+      password:password
+    });
 
-try{
+    if(error) throw error;
 
-const {error}=await supabaseClient.auth.updateUser({
-password:password
+    $("newPassword").value="";
+    $("confirmPassword").value="";
+
+    await supabaseClient.auth.signOut();
+
+    recoveryMode=false;
+
+    history.replaceState(null,"",APP_URL);
+
+    showLogin();
+
+    message(
+      "loginMsg",
+      "Password changed successfully. Please login with your new password.",
+      true
+    );
+
+  }catch(err){
+    message("resetMsg",err.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Update Password";
+  }
 });
 
-if(error) throw error;
-
-message("resetMsg","Password updated successfully!",true);
-
-$("newPassword").value="";
-$("confirmPassword").value="";
-
-await supabaseClient.auth.signOut();
-
-recoveryMode=false;
-
-history.replaceState(
-null,
-"",
-APP_URL
-);
-
-showLogin();
-
-message(
-"loginMsg",
-"Password changed successfully. Please login with your new password.",
-true
-);
-
-}catch(err){
-message("resetMsg",err.message);
-}finally{
-btn.disabled=false;
-btn.textContent="Update Password";
-}
-
-});
-
-// ==================================
 // LOGOUT
-// ==================================
 
 $("logoutBtn").addEventListener("click",async()=>{
+  const {error}=await supabaseClient.auth.signOut();
 
-const {error}=await supabaseClient.auth.signOut();
+  if(error){
+    alert(error.message);
+    return;
+  }
 
-if(error){
-alert(error.message);
-return;
-}
-
-$("loginForm").reset();
-showLogin();
-
+  $("loginForm").reset();
+  showLogin();
 });
 
-// ==================================
-// EXISTING SESSION
-// ==================================
+// CHECK EXISTING SESSION
 
 (async()=>{
+  if(recoveryMode){
+    showScreen("resetView");
+    return;
+  }
 
-if(recoveryMode){
-showReset();
-return;
-}
+  const {data,error}=await supabaseClient.auth.getSession();
 
-const {data,error}=await supabaseClient.auth.getSession();
+  if(error){
+    message("loginMsg",error.message);
+    return;
+  }
 
-if(error){
-message("loginMsg",error.message);
-return;
-}
-
-if(data.session){
-
-try{
-await loadProfile(data.session.user);
-}catch(err){
-message("loginMsg",err.message);
-}
-
-}
-
+  if(data.session){
+    try{
+      await loadProfile(data.session.user);
+    }catch(err){
+      message("loginMsg",err.message);
+    }
+  }else{
+    showLogin();
+  }
 })();
 
 </script>
+
 </body>
 </html>
