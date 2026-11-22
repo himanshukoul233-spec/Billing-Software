@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,596 +5,805 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#172554">
 <title>Vyapar Book</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:#f1f5f9;
-  font-family:Arial,sans-serif;
-  color:#172033;
-}
-header{
-  background:#172554;
-  color:white;
-  padding:24px 15px;
-  text-align:center;
-}
-header h1{margin:0;font-size:28px}
-header p{margin:8px 0 0;color:#cbd5e1}
-.container{max-width:480px;margin:25px auto;padding:12px}
-.card{
-  background:white;
-  padding:22px;
-  border-radius:16px;
-  margin-bottom:16px;
-  box-shadow:0 3px 15px #0000000d;
-}
-h2{margin-top:0;font-size:22px}
-label{display:block;margin:13px 0 6px;font-size:14px}
-input{
-  width:100%;
-  padding:13px;
-  border:1px solid #cbd5e1;
-  border-radius:9px;
-  font-size:15px;
-}
-button{
-  padding:13px;
-  border:0;
-  border-radius:9px;
-  background:#2563eb;
-  color:white;
-  font-size:15px;
-  font-weight:bold;
-  width:100%;
-  margin-top:14px;
-  cursor:pointer;
-}
+body{margin:0;background:#f1f5f9;color:#172033;font-family:Arial,sans-serif}
+header{background:#172554;color:white;padding:18px}
+header h1{margin:0;font-size:24px}
+header p{margin:5px 0 0;color:#cbd5e1;font-size:13px}
+.container{max-width:1050px;margin:auto;padding:14px}
+.card{background:white;padding:18px;border-radius:15px;margin-bottom:14px;box-shadow:0 3px 15px #0000000b}
+h2{font-size:21px;margin:0 0 12px}
+h3{font-size:16px;margin:0 0 12px}
+label{display:block;font-size:13px;margin:12px 0 5px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px;background:white}
+button{border:0;border-radius:9px;padding:12px 15px;background:#2563eb;color:white;font-weight:bold;font-size:14px;cursor:pointer}
+button:disabled{opacity:.5}
 button.secondary{background:#e2e8f0;color:#172554}
+button.danger{background:#dc2626}
 button.link{background:transparent;color:#2563eb;padding:8px}
-button:disabled{opacity:.6}
-.msg{
-  font-size:14px;
-  line-height:1.5;
-  margin-top:12px;
-  overflow-wrap:anywhere;
-}
+.full{width:100%;margin-top:14px}
 .hidden{display:none!important}
 .muted{color:#64748b;font-size:13px}
-.status{
-  background:#fef3c7;
-  color:#92400e;
-  padding:13px;
-  border-radius:9px;
-  margin-top:15px;
+.msg{font-size:14px;margin-top:12px;line-height:1.5;overflow-wrap:anywhere}
+.status{padding:12px;border-radius:9px;background:#dcfce7;color:#166534;font-size:13px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{padding:16px;border-radius:13px;background:#eff6ff}
+.stat:nth-child(2){background:#f0fdf4}
+.stat:nth-child(3){background:#fff7ed}
+.stat:nth-child(4){background:#f5f3ff}
+.stat small{color:#64748b}
+.stat strong{display:block;font-size:23px;margin-top:8px}
+.nav{display:flex;gap:8px;overflow-x:auto;padding:4px 0 13px}
+.nav button{white-space:nowrap;background:white;color:#172554;border:1px solid #dbe3ee}
+.nav button.active{background:#172554;color:white}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.action{background:#eff6ff;color:#1d4ed8;text-align:left;padding:16px}
+.row{display:flex;gap:10px}
+.row>*{flex:1;min-width:0}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:11px 8px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+th{color:#64748b;background:#f8fafc}
+.empty{text-align:center;color:#64748b;padding:25px}
+@media(max-width:650px){
+.stats{grid-template-columns:repeat(2,1fr)}
+.actions{grid-template-columns:repeat(2,1fr)}
+.container{padding:10px}
+header{padding:16px}
 }
 </style>
 </head>
-
 <body>
 
 <header>
-  <h1>Vyapar Book</h1>
-  <p>Smart Billing & Shop Management</p>
+<h1>📘 Vyapar Book</h1>
+<p>Smart Billing & Shop Management</p>
 </header>
 
 <div class="container">
 
 <!-- LOGIN -->
 <section id="loginView">
-  <div class="card">
-    <h2>Login</h2>
-    <p class="muted">Login to your shop account</p>
-
-    <form id="loginForm">
-      <label>Email</label>
-      <input type="email" name="email" autocomplete="email" required>
-
-      <label>Password</label>
-      <input type="password" name="password"
-      autocomplete="current-password" required>
-
-      <button id="loginBtn" type="submit">Login</button>
-    </form>
-
-    <button class="link" type="button" id="forgotBtn">
-      Forgot Password?
-    </button>
-
-    <p id="loginMsg" class="msg"></p>
-  </div>
-
-  <button type="button" id="showRegisterBtn">
-    Register Your Shop
-  </button>
+<div class="card">
+<h2>Login</h2>
+<p class="muted">Login to your shop account</p>
+<form id="loginForm">
+<label>Email</label>
+<input type="email" name="email" autocomplete="email" required>
+<label>Password</label>
+<input type="password" name="password" autocomplete="current-password" required>
+<button class="full" id="loginBtn">Login</button>
+</form>
+<button class="link" id="forgotBtn" type="button">Forgot Password?</button>
+<p id="loginMsg" class="msg"></p>
+</div>
+<button class="full" id="showRegisterBtn">Register Your Shop</button>
 </section>
 
-<!-- REGISTRATION -->
+<!-- REGISTER -->
 <section id="registerView" class="hidden">
-  <div class="card">
-    <h2>Register Your Shop</h2>
-    <p class="muted">Create your Vyapar Book account</p>
-
-    <form id="registerForm">
-      <label>Shop Name *</label>
-      <input name="shopName" maxlength="150" required>
-
-      <label>Owner Name *</label>
-      <input name="ownerName" maxlength="150" required>
-
-      <label>Email *</label>
-      <input name="email" type="email" autocomplete="email" required>
-
-      <label>Mobile Number</label>
-      <input name="phone" type="tel" maxlength="15">
-
-      <label>Username *</label>
-      <input name="username" maxlength="30" required>
-
-      <label>Password (minimum 12 characters) *</label>
-      <input name="password" type="password"
-      minlength="12" autocomplete="new-password" required>
-
-      <button id="registerBtn" type="submit">Register Shop</button>
-    </form>
-
-    <p id="registerMsg" class="msg"></p>
-
-    <button class="link" type="button" id="backLoginBtn">
-      Back to Login
-    </button>
-  </div>
+<div class="card">
+<h2>Register Your Shop</h2>
+<form id="registerForm">
+<label>Shop Name *</label>
+<input name="shopName" maxlength="150" required>
+<label>Owner Name *</label>
+<input name="ownerName" maxlength="150" required>
+<label>Email *</label>
+<input name="email" type="email" required>
+<label>Mobile Number</label>
+<input name="phone" type="tel">
+<label>Username *</label>
+<input name="username" maxlength="30" required>
+<label>Password (minimum 12 characters) *</label>
+<input name="password" type="password" minlength="12" required>
+<button class="full" id="registerBtn">Register Shop</button>
+</form>
+<p id="registerMsg" class="msg"></p>
+<button class="link" id="backLoginBtn" type="button">Back to Login</button>
+</div>
 </section>
 
-<!-- FORGOT PASSWORD -->
+<!-- FORGOT -->
 <section id="forgotView" class="hidden">
-  <div class="card">
-    <h2>Forgot Password</h2>
-    <p class="muted">Enter your registered email address.</p>
-
-    <form id="forgotForm">
-      <label>Email</label>
-      <input id="forgotEmail" type="email" required>
-
-      <button id="forgotSendBtn" type="submit">
-        Send Reset Link
-      </button>
-    </form>
-
-    <p id="forgotMsg" class="msg"></p>
-
-    <button class="link" type="button" id="forgotBackBtn">
-      Back to Login
-    </button>
-  </div>
+<div class="card">
+<h2>Forgot Password</h2>
+<form id="forgotForm">
+<label>Email</label>
+<input id="forgotEmail" type="email" required>
+<button class="full" id="forgotSendBtn">Send Reset Link</button>
+</form>
+<p id="forgotMsg" class="msg"></p>
+<button class="link" id="forgotBackBtn" type="button">Back to Login</button>
+</div>
 </section>
 
-<!-- RESET PASSWORD -->
+<!-- RESET -->
 <section id="resetView" class="hidden">
-  <div class="card">
-    <h2>Create New Password</h2>
-    <p class="muted">Enter and confirm your new password.</p>
-
-    <form id="resetForm">
-      <label>New Password</label>
-      <input id="newPassword" type="password"
-      minlength="12" autocomplete="new-password" required>
-
-      <label>Confirm New Password</label>
-      <input id="confirmPassword" type="password"
-      minlength="12" autocomplete="new-password" required>
-
-      <button id="updatePasswordBtn" type="submit">
-        Update Password
-      </button>
-    </form>
-
-    <p id="resetMsg" class="msg"></p>
-  </div>
+<div class="card">
+<h2>Create New Password</h2>
+<form id="resetForm">
+<label>New Password</label>
+<input id="newPassword" type="password" minlength="12" required>
+<label>Confirm Password</label>
+<input id="confirmPassword" type="password" minlength="12" required>
+<button class="full" id="updatePasswordBtn">Update Password</button>
+</form>
+<p id="resetMsg" class="msg"></p>
+</div>
 </section>
 
 <!-- DASHBOARD -->
 <section id="shopView" class="hidden">
-  <div class="card">
-    <h2>Welcome to Vyapar Book</h2>
-    <p id="shopName"></p>
-    <p id="shopEmail" class="muted"></p>
 
-    <div class="status" id="shopStatus">
-      Your shop account is active.
-    </div>
+<div class="card">
+<div class="row" style="align-items:center">
+<div>
+<h2 id="welcomeShop">My Shop</h2>
+<p id="welcomeOwner" class="muted"></p>
+<p id="welcomeEmail" class="muted"></p>
+</div>
+<button class="danger" id="logoutBtn">Logout</button>
+</div>
+<div class="status" id="shopStatus">Shop account active</div>
+</div>
 
-    <button class="secondary" id="logoutBtn">Logout</button>
-  </div>
+<nav class="nav">
+<button class="active" data-page="homePage">🏠 Home</button>
+<button data-page="billingPage">🧾 Billing</button>
+<button data-page="productsPage">📦 Products</button>
+<button data-page="customersPage">👥 Customers</button>
+<button data-page="salesPage">📊 Sales</button>
+<button data-page="settingsPage">⚙️ Settings</button>
+</nav>
+
+<!-- HOME -->
+<div id="homePage" class="page">
+<div class="stats">
+<div class="stat"><small>Total Sales</small><strong id="totalSales">₹0</strong></div>
+<div class="stat"><small>Today's Sales</small><strong id="todaySales">₹0</strong></div>
+<div class="stat"><small>Products</small><strong id="totalProducts">0</strong></div>
+<div class="stat"><small>Customers</small><strong id="totalCustomers">0</strong></div>
+</div>
+<div class="card" style="margin-top:14px">
+<h3>Quick Actions</h3>
+<div class="actions">
+<button class="action" data-go="billingPage">➕ New Billing</button>
+<button class="action" data-go="productsPage">📦 Add Product</button>
+<button class="action" data-go="customersPage">👥 Add Customer</button>
+<button class="action" data-go="salesPage">📊 Sales History</button>
+</div>
+</div>
+<div class="card">
+<h3>Recent Sales</h3>
+<div id="recentSales" class="tablewrap"></div>
+</div>
+</div>
+
+<!-- BILLING -->
+<div id="billingPage" class="page hidden">
+<div class="card">
+<h2>New Billing</h2>
+<label>Customer</label>
+<select id="billCustomer">
+<option value="">Walk-in Customer</option>
+</select>
+<label>Product</label>
+<select id="billProduct">
+<option value="">Select Product</option>
+</select>
+<div class="row">
+<div><label>Quantity</label><input type="number" id="billQty" min="1" value="1"></div>
+<div><label>Unit Price (₹)</label><input type="number" id="billPrice" min="0" step="0.01"></div>
+</div>
+<button class="full" id="addCartBtn">Add to Bill</button>
+<div id="cartList" style="margin-top:15px"></div>
+<h3 style="margin-top:18px">Total: <span id="billTotal">₹0.00</span></h3>
+<button class="full" id="saveBillBtn">Save Bill</button>
+<p id="billMsg" class="msg"></p>
+</div>
+</div>
+
+<!-- PRODUCTS -->
+<div id="productsPage" class="page hidden">
+<div class="card">
+<h2>Add New Product</h2>
+<form id="productForm">
+<label>Product Name *</label>
+<input name="name" required>
+<label>Barcode</label>
+<input name="barcode">
+<div class="row">
+<div><label>Selling Price *</label><input name="price" type="number" min="0" step="0.01" required></div>
+<div><label>Cost Price</label><input name="cost" type="number" min="0" step="0.01" value="0"></div>
+</div>
+<label>GST Percentage</label>
+<input name="gst_percent" type="number" min="0" step="0.01" value="0">
+<button class="full" id="addProductBtn">Save Product</button>
+</form>
+<p id="productMsg" class="msg"></p>
+</div>
+<div class="card">
+<h3>Product List</h3>
+<div id="productList" class="tablewrap"></div>
+</div>
+</div>
+
+<!-- CUSTOMERS -->
+<div id="customersPage" class="page hidden">
+<div class="card">
+<h2>Add Customer</h2>
+<form id="customerForm">
+<label>Customer Name *</label>
+<input name="name" required>
+<label>Email</label>
+<input name="email" type="email">
+<button class="full" id="addCustomerBtn">Save Customer</button>
+</form>
+<p id="customerMsg" class="msg"></p>
+</div>
+<div class="card">
+<h3>Customer List</h3>
+<div id="customerList" class="tablewrap"></div>
+</div>
+</div>
+
+<!-- SALES -->
+<div id="salesPage" class="page hidden">
+<div class="card">
+<h2>Sales History</h2>
+<div id="salesList" class="tablewrap"></div>
+</div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settingsPage" class="page hidden">
+<div class="card">
+<h2>Shop Details</h2>
+<p id="settingShop"></p>
+<p id="settingOwner"></p>
+<p id="settingEmail"></p>
+<p id="settingUsername"></p>
+<p id="settingPlan"></p>
+<p id="settingExpiry"></p>
+<p id="settingStatus"></p>
+</div>
+<div class="card">
+<h3>Account</h3>
+<p class="muted">Your shop account and subscription details.</p>
+<button class="danger full" id="logoutBtn2">Logout</button>
+</div>
+</div>
+
 </section>
-
 </div>
 
 <script>
+const SUPABASE_URL="https://fhxyeccekxbwergdwthx.supabase.co";
+const SUPABASE_KEY="sb_publishable_Zu3FsfPnBuhjh9l_4TfWYw_v7-MWH62";
+const APP_URL="https://himanshukoul233-spec.github.io/Billing-Software/";
 
-// SUPABASE CONNECTION
-
-const SUPABASE_URL =
-"https://fhxyeccekxbwergdwthx.supabase.co";
-
-const SUPABASE_KEY =
-"sb_publishable_Zu3FsfPnBuhjh9l_4TfWYw_v7-MWH62";
-
-const APP_URL =
-"https://himanshukoul233-spec.github.io/Billing-Software/";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY,
-  {
-    auth:{
-      persistSession:true,
-      autoRefreshToken:true,
-      detectSessionInUrl:true
-    }
-  }
-);
-
-const $ = id => document.getElementById(id);
-
-let recoveryMode =
-  new URLSearchParams(location.hash.substring(1)).get("type")
-  === "recovery";
-
-// COMMON FUNCTIONS
-
-function message(id,text,success=false){
-  const el=$(id);
-  el.textContent=text;
-  el.style.color=success?"#15803d":"#b91c1c";
-}
-
-function showScreen(screen){
-  [
-    "loginView",
-    "registerView",
-    "forgotView",
-    "resetView",
-    "shopView"
-  ].forEach(id=>{
-    $(id).classList.add("hidden");
-  });
-
-  $(screen).classList.remove("hidden");
-}
-
-function showLogin(){
-  showScreen("loginView");
-}
-
-function showDashboard(profile,user){
-  showScreen("shopView");
-
-  const shop=profile.shop_name || "My Shop";
-  const owner=
-    profile.owner_name ||
-    user.user_metadata?.owner_name ||
-    "Shop Owner";
-
-  $("shopName").textContent=shop+" · "+owner;
-  $("shopEmail").textContent=profile.email || user.email;
-
-  const status=$("shopStatus");
-
-  if(profile.status==="active"){
-    status.textContent="Your shop account is active.";
-    status.style.background="#dcfce7";
-    status.style.color="#166534";
-  }else if(profile.status==="suspended"){
-    status.textContent="Your shop account is suspended. Contact administrator.";
-    status.style.background="#fee2e2";
-    status.style.color="#991b1b";
-  }else{
-    status.textContent="Registration successful! Waiting for admin approval.";
-    status.style.background="#fef3c7";
-    status.style.color="#92400e";
-  }
-}
-
-// LOAD PROFILE
-
-async function loadProfile(user){
-  if(!user || !user.id){
-    throw new Error("Login session not found.");
-  }
-
-  let {data,error}=await supabaseClient
-    .from("shop_profiles")
-    .select("id,email,shop_name,owner_name,status")
-    .eq("id",user.id)
-    .maybeSingle();
-
-  if(error){
-    const result=await supabaseClient
-      .from("shop_profiles")
-      .select("id,email,shop_name,status")
-      .eq("id",user.id)
-      .maybeSingle();
-
-    data=result.data;
-    error=result.error;
-  }
-
-  if(error){
-    throw new Error("Profile database error: "+error.message);
-  }
-
-  if(!data){
-    throw new Error("Shop profile not found. Please contact administrator.");
-  }
-
-  showDashboard(data,user);
-}
-
-// OPEN REGISTRATION
-
-$("showRegisterBtn").addEventListener("click",()=>{
-  showScreen("registerView");
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+ auth:{
+  persistSession:true,
+  autoRefreshToken:true,
+  detectSessionInUrl:true
+ }
 });
 
-$("backLoginBtn").addEventListener("click",showLogin);
+const $=id=>document.getElementById(id);
+let currentUser=null,profile=null,shop=null,shopId=null;
+let products=[],customers=[],sales=[],cart=[];
+let recoveryMode=new URLSearchParams(location.hash.substring(1)).get("type")==="recovery";
 
-// REGISTRATION
+function msg(id,text,ok=false){
+ const el=$(id);
+ if(el){el.textContent=text;el.style.color=ok?"#15803d":"#b91c1c";}
+}
+function screen(id){
+ ["loginView","registerView","forgotView","resetView","shopView"].forEach(x=>$(x).classList.add("hidden"));
+ $(id).classList.remove("hidden");
+}
+function money(n){
+ return "₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function safe(s){
+ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function dateText(d){
+ return d?new Date(d).toLocaleDateString("en-IN"):"-";
+}
+function tableEmpty(text){
+ return '<p class="empty">'+safe(text)+'</p>';
+}
+function setLoading(btn,loading,text){
+ btn.disabled=loading;
+ btn.textContent=loading?"Please wait...":text;
+}
 
-$("registerForm").addEventListener("submit",async e=>{
-  e.preventDefault();
+async function loadProfile(user){
+ currentUser=user;
 
-  const btn=$("registerBtn");
-  btn.disabled=true;
-  btn.textContent="Registering...";
+ const p=await db.from("shop_profiles")
+ .select("id,owner_name,email,phone_number,username,status,subscription_plan,subscription_expires")
+ .eq("id",user.id).maybeSingle();
 
-  message("registerMsg","");
+ if(p.error)throw new Error("Profile database error: "+p.error.message);
+ if(!p.data)throw new Error("Shop profile not found for this login.");
 
-  const f=new FormData(e.target);
+ profile=p.data;
 
-  const shopName=f.get("shopName").trim();
-  const ownerName=f.get("ownerName").trim();
-  const email=f.get("email").trim().toLowerCase();
-  const phone=f.get("phone").trim();
-  const username=f.get("username").trim().toLowerCase();
-  const password=f.get("password");
+ const s=await db.from("shops")
+ .select("id,name,owner_id,status,trials_ends_at,created_at,owner_name,username")
+ .eq("owner_id",user.id).maybeSingle();
 
-  try{
-    if(!shopName || !ownerName || !email || !username || !password){
-      throw new Error("Please fill all required fields.");
-    }
+ if(s.error)throw new Error("Shop database error: "+s.error.message);
+ if(!s.data)throw new Error("Shop record not found. Please check the shops table and owner_id.");
 
-    if(!/^[a-z0-9_]{3,30}$/.test(username)){
-      throw new Error("Username must be 3-30 characters: letters, numbers or underscore.");
-    }
+ shop=s.data;
+ shopId=shop.id;
 
-    if(password.length<12){
-      throw new Error("Password must have at least 12 characters.");
-    }
+ if(profile.status==="suspended" || shop.status==="suspended"){
+  throw new Error("Your shop account is suspended. Please contact administrator.");
+ }
 
-    const {data,error}=await supabaseClient.auth.signUp({
-      email,
-      password,
-      options:{
-        emailRedirectTo:APP_URL,
-        data:{
-          shop_name:shopName,
-          owner_name:ownerName,
-          phone:phone,
-          username:username
-        }
-      }
-    });
+ $("welcomeShop").textContent=shop.name||"My Shop";
+ $("welcomeOwner").textContent="Owner: "+(profile.owner_name||shop.owner_name||"Shop Owner");
+ $("welcomeEmail").textContent=profile.email||user.email;
+ $("shopStatus").textContent="Shop account: "+(profile.status||shop.status||"active");
 
-    if(error) throw error;
+ $("settingShop").textContent="Shop: "+(shop.name||"-");
+ $("settingOwner").textContent="Owner: "+(profile.owner_name||shop.owner_name||"-");
+ $("settingEmail").textContent="Email: "+(profile.email||user.email||"-");
+ $("settingUsername").textContent="Username: "+(profile.username||shop.username||"-");
+ $("settingPlan").textContent="Plan: "+(profile.subscription_plan||"Not selected");
+ $("settingExpiry").textContent="Subscription expiry: "+dateText(profile.subscription_expires||shop.trials_ends_at);
+ $("settingStatus").textContent="Status: "+(profile.status||shop.status||"-");
 
-    if(data.session && data.user){
-      await loadProfile(data.user);
-      message("registerMsg","Registration successful!",true);
-    }else{
-      message(
-        "registerMsg",
-        "Registration successful! Please check your email for verification.",
-        true
-      );
-    }
+ screen("shopView");
+ await loadAllData();
+}
 
-    e.target.reset();
+async function loadAllData(){
+ await Promise.all([
+  loadProducts(),
+  loadCustomers(),
+  loadSales()
+ ]);
+ updateDashboard();
+}
 
-  }catch(err){
-    message("registerMsg",err.message);
-  }finally{
-    btn.disabled=false;
-    btn.textContent="Register Shop";
-  }
+async function loadProducts(){
+ const r=await db.from("shop_product")
+ .select("id,shop_id,name,barcode,price,cost,gst_percent,created_at")
+ .eq("shop_id",shopId).order("created_at",{ascending:false});
+
+ if(r.error)throw new Error("Products: "+r.error.message);
+ products=r.data||[];
+ renderProducts();
+ fillProductSelect();
+}
+
+async function loadCustomers(){
+ const r=await db.from("shop_customer")
+ .select("id,shop_id,name,email,created_at")
+ .eq("shop_id",shopId).order("created_at",{ascending:false});
+
+ if(r.error)throw new Error("Customers: "+r.error.message);
+ customers=r.data||[];
+ renderCustomers();
+ fillCustomerSelect();
+}
+
+async function loadSales(){
+ const r=await db.from("shop_sales")
+ .select("id,shop_id,custumer_id,invoice_no,total,created_at")
+ .eq("shop_id",shopId).order("created_at",{ascending:false});
+
+ if(r.error)throw new Error("Sales: "+r.error.message);
+ sales=r.data||[];
+ renderSales();
+}
+
+function updateDashboard(){
+ const total=sales.reduce((a,b)=>a+Number(b.total||0),0);
+ const today=new Date().toDateString();
+ const todayTotal=sales.filter(x=>new Date(x.created_at).toDateString()===today)
+ .reduce((a,b)=>a+Number(b.total||0),0);
+
+ $("totalSales").textContent=money(total);
+ $("todaySales").textContent=money(todayTotal);
+ $("totalProducts").textContent=products.length;
+ $("totalCustomers").textContent=customers.length;
+
+ const recent=sales.slice(0,5);
+ $("recentSales").innerHTML=recent.length?
+ '<table><tr><th>Invoice</th><th>Date</th><th>Total</th></tr>'+
+ recent.map(x=>'<tr><td>'+safe(x.invoice_no)+'</td><td>'+dateText(x.created_at)+'</td><td>'+money(x.total)+'</td></tr>').join("")+
+ '</table>':tableEmpty("No sales yet");
+}
+
+function renderProducts(){
+ $("productList").innerHTML=products.length?
+ '<table><tr><th>Product</th><th>Barcode</th><th>Price</th><th>GST</th></tr>'+
+ products.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.barcode||"-")+'</td><td>'+money(x.price)+'</td><td>'+Number(x.gst_percent||0)+'%</td></tr>').join("")+
+ '</table>':tableEmpty("No products added yet");
+}
+
+function renderCustomers(){
+ $("customerList").innerHTML=customers.length?
+ '<table><tr><th>Name</th><th>Email</th><th>Added</th></tr>'+
+ customers.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.email||"-")+'</td><td>'+dateText(x.created_at)+'</td></tr>').join("")+
+ '</table>':tableEmpty("No customers added yet");
+}
+
+function renderSales(){
+ $("salesList").innerHTML=sales.length?
+ '<table><tr><th>Invoice</th><th>Date</th><th>Total</th></tr>'+
+ sales.map(x=>'<tr><td>'+safe(x.invoice_no)+'</td><td>'+dateText(x.created_at)+'</td><td>'+money(x.total)+'</td></tr>').join("")+
+ '</table>':tableEmpty("No sales found");
+}
+
+function fillProductSelect(){
+ $("billProduct").innerHTML='<option value="">Select Product</option>'+
+ products.map(x=>'<option value="'+safe(x.id)+'">'+safe(x.name)+' - '+money(x.price)+'</option>').join("");
+}
+function fillCustomerSelect(){
+ $("billCustomer").innerHTML='<option value="">Walk-in Customer</option>'+
+ customers.map(x=>'<option value="'+safe(x.id)+'">'+safe(x.name)+'</option>').join("");
+}
+
+function renderCart(){
+ $("cartList").innerHTML=cart.length?
+ '<div class="tablewrap"><table><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr>'+
+ cart.map((x,i)=>'<tr><td>'+safe(x.name)+'</td><td>'+x.quantity+'</td><td>'+money(x.price)+'</td><td>'+money(x.lineTotal)+'</td><td><button class="danger removeCart" data-index="'+i+'">X</button></td></tr>').join("")+
+ '</table></div>':tableEmpty("No products in bill");
+
+ $("billTotal").textContent=money(cart.reduce((a,x)=>a+x.lineTotal,0));
+ document.querySelectorAll(".removeCart").forEach(b=>{
+  b.addEventListener("click",()=>{
+   cart.splice(Number(b.dataset.index),1);
+   renderCart();
+  });
+ });
+}
+
+function navigate(page){
+ document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
+ $(page).classList.remove("hidden");
+ document.querySelectorAll(".nav button").forEach(b=>{
+  b.classList.toggle("active",b.dataset.page===page);
+ });
+ if(page==="homePage")updateDashboard();
+}
+
+document.querySelectorAll(".nav button").forEach(b=>{
+ b.addEventListener("click",()=>navigate(b.dataset.page));
+});
+document.querySelectorAll("[data-go]").forEach(b=>{
+ b.addEventListener("click",()=>navigate(b.dataset.go));
 });
 
 // LOGIN
-
 $("loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();
+ e.preventDefault();
+ const btn=$("loginBtn");
+ setLoading(btn,true,"Login");
+ msg("loginMsg","");
 
-  const btn=$("loginBtn");
-  btn.disabled=true;
-  btn.textContent="Logging in...";
+ const f=new FormData(e.target);
+ try{
+  const {data,error}=await db.auth.signInWithPassword({
+   email:f.get("email").trim().toLowerCase(),
+   password:f.get("password")
+  });
+  if(error)throw error;
+  await loadProfile(data.user);
+ }catch(err){
+  msg("loginMsg",err.message);
+  await db.auth.signOut();
+  screen("loginView");
+ }finally{
+  setLoading(btn,false,"Login");
+ }
+});
 
-  message("loginMsg","");
+// REGISTER
+$("showRegisterBtn").onclick=()=>screen("registerView");
+$("backLoginBtn").onclick=()=>screen("loginView");
 
-  const f=new FormData(e.target);
+$("registerForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const btn=$("registerBtn");
+ setLoading(btn,true,"Register Shop");
+ msg("registerMsg","");
 
-  try{
-    const {data,error}=await supabaseClient.auth.signInWithPassword({
-      email:f.get("email").trim().toLowerCase(),
-      password:f.get("password")
-    });
+ const f=new FormData(e.target);
+ const shopName=f.get("shopName").trim();
+ const ownerName=f.get("ownerName").trim();
+ const email=f.get("email").trim().toLowerCase();
+ const phone=f.get("phone").trim();
+ const username=f.get("username").trim().toLowerCase();
+ const password=f.get("password");
 
-    if(error) throw error;
+ try{
+  if(!/^[a-z0-9_]{3,30}$/.test(username))
+   throw new Error("Username must be 3-30 characters using letters, numbers or underscore.");
+  if(password.length<12)throw new Error("Password must have at least 12 characters.");
 
-    await loadProfile(data.user);
+  const {data,error}=await db.auth.signUp({
+   email,password,
+   options:{
+    emailRedirectTo:APP_URL,
+    data:{
+     shop_name:shopName,
+     owner_name:ownerName,
+     phone:phone,
+     username:username
+    }
+   }
+  });
+  if(error)throw error;
 
-  }catch(err){
-    message("loginMsg",err.message);
-  }finally{
-    btn.disabled=false;
-    btn.textContent="Login";
+  e.target.reset();
+
+  if(data.session&&data.user){
+   await loadProfile(data.user);
+  }else{
+   msg("registerMsg","Registration successful! Please verify your email before login.",true);
   }
+ }catch(err){
+  msg("registerMsg",err.message);
+ }finally{
+  setLoading(btn,false,"Register Shop");
+ }
 });
 
-// OPEN FORGOT PASSWORD
-
-$("forgotBtn").addEventListener("click",()=>{
-  $("forgotEmail").value=
-    document.querySelector('#loginForm input[name="email"]').value.trim();
-
-  message("forgotMsg","");
-  showScreen("forgotView");
-});
-
-$("forgotBackBtn").addEventListener("click",showLogin);
-
-// SEND RESET EMAIL
+// FORGOT PASSWORD
+$("forgotBtn").onclick=()=>{
+ $("forgotEmail").value=document.querySelector('#loginForm input[name="email"]').value.trim();
+ msg("forgotMsg","");
+ screen("forgotView");
+};
+$("forgotBackBtn").onclick=()=>screen("loginView");
 
 $("forgotForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-
-  const btn=$("forgotSendBtn");
-  btn.disabled=true;
-  btn.textContent="Sending...";
-
-  message("forgotMsg","");
-
-  try{
-    const email=$("forgotEmail").value.trim().toLowerCase();
-
-    const {error}=await supabaseClient.auth.resetPasswordForEmail(
-      email,
-      {redirectTo:APP_URL}
-    );
-
-    if(error) throw error;
-
-    message(
-      "forgotMsg",
-      "Recovery email sent. Please check your Inbox and Spam folder.",
-      true
-    );
-
-  }catch(err){
-    message("forgotMsg",err.message);
-  }finally{
-    btn.disabled=false;
-    btn.textContent="Send Reset Link";
-  }
+ e.preventDefault();
+ const btn=$("forgotSendBtn");
+ setLoading(btn,true,"Send Reset Link");
+ try{
+  const {error}=await db.auth.resetPasswordForEmail(
+   $("forgotEmail").value.trim().toLowerCase(),
+   {redirectTo:APP_URL}
+  );
+  if(error)throw error;
+  msg("forgotMsg","Recovery email sent. Check Inbox and Spam folder.",true);
+ }catch(err){
+  msg("forgotMsg",err.message);
+ }finally{
+  setLoading(btn,false,"Send Reset Link");
+ }
 });
 
-// PASSWORD RECOVERY EVENT
-
-supabaseClient.auth.onAuthStateChange((event,session)=>{
-  if(event==="PASSWORD_RECOVERY"){
-    recoveryMode=true;
-    showScreen("resetView");
-  }
+// PASSWORD RECOVERY
+db.auth.onAuthStateChange((event)=>{
+ if(event==="PASSWORD_RECOVERY"){
+  recoveryMode=true;
+  screen("resetView");
+ }
 });
-
-// UPDATE PASSWORD
 
 $("resetForm").addEventListener("submit",async e=>{
-  e.preventDefault();
+ e.preventDefault();
+ const password=$("newPassword").value;
+ const confirm=$("confirmPassword").value;
+ const btn=$("updatePasswordBtn");
 
-  const password=$("newPassword").value;
-  const confirm=$("confirmPassword").value;
+ if(password.length<12){msg("resetMsg","Password must have at least 12 characters.");return;}
+ if(password!==confirm){msg("resetMsg","Passwords do not match.");return;}
 
-  const btn=$("updatePasswordBtn");
-
-  if(password.length<12){
-    message("resetMsg","Password must have at least 12 characters.");
-    return;
-  }
-
-  if(password!==confirm){
-    message("resetMsg","Passwords do not match.");
-    return;
-  }
-
-  btn.disabled=true;
-  btn.textContent="Updating...";
-
-  try{
-    const {error}=await supabaseClient.auth.updateUser({
-      password:password
-    });
-
-    if(error) throw error;
-
-    $("newPassword").value="";
-    $("confirmPassword").value="";
-
-    await supabaseClient.auth.signOut();
-
-    recoveryMode=false;
-
-    history.replaceState(null,"",APP_URL);
-
-    showLogin();
-
-    message(
-      "loginMsg",
-      "Password changed successfully. Please login with your new password.",
-      true
-    );
-
-  }catch(err){
-    message("resetMsg",err.message);
-  }finally{
-    btn.disabled=false;
-    btn.textContent="Update Password";
-  }
+ setLoading(btn,true,"Update Password");
+ try{
+  const {error}=await db.auth.updateUser({password});
+  if(error)throw error;
+  await db.auth.signOut();
+  history.replaceState(null,"",APP_URL);
+  $("resetForm").reset();
+  screen("loginView");
+  msg("loginMsg","Password changed successfully. Please login.",true);
+ }catch(err){
+  msg("resetMsg",err.message);
+ }finally{
+  setLoading(btn,false,"Update Password");
+ }
 });
+
+// ADD PRODUCT
+$("productForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const btn=$("addProductBtn");
+ setLoading(btn,true,"Save Product");
+ msg("productMsg","");
+
+ const f=new FormData(e.target);
+ try{
+  const {error}=await db.from("shop_product").insert({
+   shop_id:shopId,
+   name:f.get("name").trim(),
+   barcode:f.get("barcode").trim()||null,
+   price:Number(f.get("price")),
+   cost:Number(f.get("cost")||0),
+   gst_percent:Number(f.get("gst_percent")||0)
+  });
+  if(error)throw error;
+  e.target.reset();
+  msg("productMsg","Product saved successfully!",true);
+  await loadProducts();
+  updateDashboard();
+ }catch(err){
+  msg("productMsg",err.message);
+ }finally{
+  setLoading(btn,false,"Save Product");
+ }
+});
+
+// ADD CUSTOMER
+$("customerForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const btn=$("addCustomerBtn");
+ setLoading(btn,true,"Save Customer");
+ msg("customerMsg","");
+
+ const f=new FormData(e.target);
+ try{
+  const {error}=await db.from("shop_customer").insert({
+   shop_id:shopId,
+   name:f.get("name").trim(),
+   email:f.get("email").trim()||null
+  });
+  if(error)throw error;
+  e.target.reset();
+  msg("customerMsg","Customer saved successfully!",true);
+  await loadCustomers();
+  updateDashboard();
+ }catch(err){
+  msg("customerMsg",err.message);
+ }finally{
+  setLoading(btn,false,"Save Customer");
+ }
+});
+
+// PRODUCT SELECTION
+$("billProduct").addEventListener("change",()=>{
+ const p=products.find(x=>x.id===$("billProduct").value);
+ $("billPrice").value=p?Number(p.price):"";
+});
+
+// ADD TO CART
+$("addCartBtn").onclick=()=>{
+ const p=products.find(x=>x.id===$("billProduct").value);
+ const qty=Number($("billQty").value);
+ const price=Number($("billPrice").value);
+
+ if(!p){msg("billMsg","Please select a product.");return;}
+ if(!Number.isFinite(qty)||qty<=0){msg("billMsg","Enter a valid quantity.");return;}
+ if(!Number.isFinite(price)||price<0){msg("billMsg","Enter a valid price.");return;}
+
+ const gst=Number(p.gst_percent||0);
+ const base=qty*price;
+ const lineTotal=base+(base*gst/100);
+
+ cart.push({
+  id:p.id,
+  name:p.name,
+  quantity:qty,
+  price:price,
+  gst:gst,
+  lineTotal:lineTotal
+ });
+
+ $("billQty").value=1;
+ renderCart();
+ msg("billMsg","");
+};
+
+// SAVE BILL
+$("saveBillBtn").onclick=async()=>{
+ if(!cart.length){msg("billMsg","Please add products first.");return;}
+
+ const btn=$("saveBillBtn");
+ setLoading(btn,true,"Save Bill");
+
+ try{
+  const total=cart.reduce((a,x)=>a+x.lineTotal,0);
+  const customerId=$("billCustomer").value||null;
+  const invoice="VB-"+Date.now();
+
+  const sale=await db.from("shop_sales").insert({
+   shop_id:shopId,
+   custumer_id:customerId,
+   invoice_no:invoice,
+   total:total
+  }).select("id").single();
+
+  if(sale.error)throw sale.error;
+
+  const items=cart.map(x=>({
+   sales_id:sale.data.id,
+   shop_id:shopId,
+   product_id:x.id,
+   product_name:x.name,
+   quantity:x.quantity,
+   unit_price:x.price,
+   gst_percent:x.gst,
+   line_total:x.lineTotal
+  }));
+
+  const itemResult=await db.from("shop_sales_item").insert(items);
+  if(itemResult.error){
+   throw new Error("Bill header saved, but bill items failed: "+itemResult.error.message+". Please do not create the same bill again until checked.");
+  }
+
+  const savedTotal=money(total);
+  cart=[];
+  renderCart();
+  $("billCustomer").value="";
+  msg("billMsg","Bill saved successfully! Invoice: "+invoice+" | Total: "+savedTotal,true);
+
+  await loadSales();
+  updateDashboard();
+ }catch(err){
+  msg("billMsg",err.message);
+ }finally{
+  setLoading(btn,false,"Save Bill");
+ }
+};
 
 // LOGOUT
+async function logout(){
+ const {error}=await db.auth.signOut();
+ if(error){alert(error.message);return;}
+ currentUser=null;
+ profile=null;
+ shop=null;
+ shopId=null;
+ products=[];
+ customers=[];
+ sales=[];
+ cart=[];
+ $("loginForm").reset();
+ screen("loginView");
+}
+$("logoutBtn").onclick=logout;
+$("logoutBtn2").onclick=logout;
 
-$("logoutBtn").addEventListener("click",async()=>{
-  const {error}=await supabaseClient.auth.signOut();
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  $("loginForm").reset();
-  showLogin();
-});
-
-// CHECK EXISTING SESSION
-
+// INITIAL SESSION
 (async()=>{
-  if(recoveryMode){
-    showScreen("resetView");
-    return;
-  }
+ if(recoveryMode){
+  screen("resetView");
+  return;
+ }
 
-  const {data,error}=await supabaseClient.auth.getSession();
+ screen("loginView");
 
-  if(error){
-    message("loginMsg",error.message);
-    return;
-  }
+ const {data,error}=await db.auth.getSession();
+ if(error){
+  msg("loginMsg",error.message);
+  return;
+ }
 
-  if(data.session){
-    try{
-      await loadProfile(data.session.user);
-    }catch(err){
-      message("loginMsg",err.message);
-    }
-  }else{
-    showLogin();
+ if(data.session){
+  try{
+   await loadProfile(data.session.user);
+  }catch(err){
+   msg("loginMsg",err.message);
+   screen("loginView");
   }
+ }
 })();
-
 </script>
-
 </body>
 </html>
