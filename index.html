@@ -123,7 +123,7 @@ header{padding:16px}
 
 <!-- RESET -->
 <section id="resetView" class="hidden">
-<div class="card">
+<div class="card">e
 <h2>Create New Password</h2>
 <form id="resetForm">
 <label>New Password</label>
@@ -327,8 +327,8 @@ function setLoading(btn,loading,text){
 async function loadProfile(user){
  currentUser=user;
 
- const p=await db.from("shop_profiles")
- .select("id,owner_name,email,phone_number,username,status,subscription_plan,subscription_expires")
+ const p=await db.from("shop_profiles"
+ .select("id,owner_name,email,phone_,username,status,subscription_plan,subscription_expires")
  .eq("id",user.id).maybeSingle();
 
  if(p.error)throw new Error("Profile database error: "+p.error.message);
