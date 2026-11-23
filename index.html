@@ -64,46 +64,166 @@ th{color:#64748b;background:#f8fafc}
 .container{padding:10px}
 header{padding:16px}
 }
- /* MODERN DARK GREEN THEME */
+
+/* VYAPAR BOOK - WHITE LIGHT BLUE THEME */
+
 body {
-  background: linear-gradient(135deg, #101817, #172923, #0b1210) !important;
-  color: #e5f5eb !important;
+  background: #f4f8ff !important;
+  color: #142544 !important;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  background: linear-gradient(110deg, #ffffff, #e4f2ff) !important;
+  color: #142d55 !important;
+  border-bottom: 1px solid #c9e1ff;
+  padding: 15px !important;
+}
+
+header h1 {
+  color: #142d55 !important;
+  font-size: 22px !important;
+}
+
+header p {
+  color: #526b91 !important;
+}
+
+.container {
+  max-width: 1100px;
+  padding: 12px !important;
 }
 
 .card {
-  background: #192521 !important;
-  border: 1px solid #294638 !important;
-  border-radius: 12px !important;
+  background: #ffffff !important;
+  color: #142544 !important;
+  border: 1px solid #d7e7fa !important;
+  border-radius: 14px !important;
   padding: 14px !important;
+  box-shadow: 0 3px 12px rgba(35, 92, 150, .08) !important;
+}
+
+h2, h3 {
+  color: #142d55 !important;
+}
+
+label, p, td {
+  color: #263c5e;
+}
+
+.muted, .stat small {
+  color: #71839e !important;
+}
+
+.stats {
+  gap: 10px;
+}
+
+.stat {
+  background: #e5f3ff !important;
+  border: 1px solid #c8e4ff;
+  border-radius: 13px;
+  padding: 12px !important;
+}
+
+.stat:nth-child(2) {
+  background: #e8f9f3 !important;
+}
+
+.stat:nth-child(3) {
+  background: #eef1ff !important;
+}
+
+.stat:nth-child(4) {
+  background: #fff5e6 !important;
+}
+
+.stat strong {
+  color: #142d55 !important;
+  font-size: 21px !important;
+}
+
+.nav {
+  gap: 7px;
+}
+
+.nav button {
+  background: #ffffff !important;
+  color: #17365f !important;
+  border: 1px solid #cfe1f7 !important;
+  padding: 9px 12px !important;
+  font-size: 13px !important;
+}
+
+.nav button.active {
+  background: #087be8 !important;
+  color: #ffffff !important;
 }
 
 button, .btn {
-  padding: 8px 12px !important;
+  background: #087be8;
+  color: #ffffff;
+  padding: 9px 12px !important;
   font-size: 13px !important;
-  border-radius: 8px !important;
+  border-radius: 9px !important;
+}
+
+button.secondary, .action {
+  background: #e8f3ff !important;
+  color: #15549a !important;
+  border: 1px solid #cfe3fb !important;
+}
+
+button.danger {
+  background: #dc3434 !important;
+  color: #ffffff !important;
+}
+
+button.link {
+  background: transparent !important;
+  color: #087be8 !important;
 }
 
 input, select, textarea {
+  background: #ffffff !important;
+  color: #142544 !important;
+  border: 1px solid #cbdcf0 !important;
+  border-radius: 8px !important;
   padding: 9px !important;
   font-size: 13px !important;
-  border-radius: 8px !important;
-  background: #101a16 !important;
-  color: #e5f5eb !important;
-  border: 1px solid #365344 !important;
 }
 
-h1, h2, h3 {
-  color: #f0fff5 !important;
+th {
+  background: #e3f1ff !important;
+  color: #17365f !important;
 }
 
-label, p, td, th {
-  color: #d2e7da;
+td, th {
+  border-bottom: 1px solid #e0eaf5 !important;
+  padding: 9px 7px !important;
 }
 
-button:not(.danger) {
-  background-color: #16834b;
-  color: white;
+.status {
+  background: #e4f8ed !important;
+  color: #147442 !important;
 }
+
+.empty {
+  color: #71839e !important;
+}
+
+@media(max-width:650px) {
+  .container {
+    padding: 9px !important;
+  }
+  .card {
+    padding: 11px !important;
+  }
+  .stat {
+    padding: 10px !important;
+  }
+}
+
 </style>
 </head>
 <body>
