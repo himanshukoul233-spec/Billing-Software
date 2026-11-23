@@ -609,6 +609,10 @@ await loadVyaparSubscription();
 async function loadVyaparSubscription(){
   const plansBox = $("subscriptionPlans");
   const statusBox = $("mySubscriptionStatus");
+ if(!plansBox || !statusBox){
+  console.error("Subscription HTML element missing");
+  return;
+ }
 
   plansBox.textContent = "Loading Plans...";
   statusBox.textContent = "";
