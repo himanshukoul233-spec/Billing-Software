@@ -722,7 +722,7 @@ $("saveBillBtn").onclick=async()=>{
 
   const sale=await db.from("shop_sales").insert({
    shop_id:shopId,
-   custumer_id:custumerId,
+   customer_id:customerId,
    invoice_no:invoice,
    total:total
   }).select("id").single();
