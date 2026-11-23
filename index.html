@@ -583,6 +583,38 @@ async function loadProfile(user){
 
  shop=s.data;
  shopId=shop.id;
+ 
+let activeSubscriptionPlan = null;
+let activeSubscriptionExpiry = null;
+let activeSubscriptionStatus = null;
+
+const sub = await db
+  .from("shop_subscriptions")
+  .select("plan_id,expires_at,status")
+  .eq("shop_id", shop.id)
+  .maybeSingle();
+
+if(sub.error){
+  throw new Error("Subscription database error: " + sub.error.message);
+}
+
+if(sub.data){
+  activeSubscriptionExpiry = sub.data.expires_at;
+  activeSubscriptionStatus = sub.data.status;
+
+  const plan = await db
+    .from("subscription_plans")
+    .select("name")
+    .eq("id", sub.data.plan_id)
+    .maybeSingle();
+
+  if(plan.error){
+    throw new Error("Plan database error: " + plan.error.message);
+  }
+
+  activeSubscriptionPlan = plan.data?.name || "Active Plan";
+}
+
 
  if(profile.status==="suspended" || shop.status==="suspended"){
   throw new Error("Your shop account is suspended. Please contact administrator.");
@@ -597,9 +629,16 @@ async function loadProfile(user){
  $("settingOwner").textContent="Owner: "+(profile.owner_name||shop.owner_name||"-");
  $("settingEmail").textContent="Email: "+(profile.email||user.email||"-");
  $("settingUsername").textContent="Username: "+(profile.username||shop.username||"-");
- $("settingPlan").textContent="Plan: "+(profile.subscription_plan||"Not selected");
- $("settingExpiry").textContent="Subscription expiry: "+dateText(profile.subscription_expires_at||shop.trial_ends_at);
- $("settingStatus").textContent="Status: "+(profile.status||shop.status||"-");
+ 
+$("settingPlan").textContent =
+  "Plan: " + (activeSubscriptionPlan || profile.subscription_plan || "Not selected");
+
+$("settingExpiry").textContent =
+  "Subscription expiry: " + dateText(activeSubscriptionExpiry || profile.subscription_expires_at || shop.trial_ends_at);
+
+$("settingStatus").textContent =
+  "Status: " + (activeSubscriptionStatus || profile.status || shop.status || "-");
+
 
  screen("shopView");
 await loadAllData();
