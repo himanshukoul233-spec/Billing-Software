@@ -398,7 +398,7 @@ async function loadCustomers(){
 
 async function loadSales(){
  const r=await db.from("shop_sales")
- .select("id,shop_id,custumer_id,invoice_no,total,created_at")
+ .select("id,shop_id,customer_id,invoice_no,total,created_at")
  .eq("shop_id",shopId).order("created_at",{ascending:false});
 
  if(r.error)throw new Error("Sales: "+r.error.message);
@@ -722,7 +722,7 @@ $("saveBillBtn").onclick=async()=>{
 
   const sale=await db.from("shop_sales").insert({
    shop_id:shopId,
-   custumer_id:customerId,
+   custumer_id:custumerId,
    invoice_no:invoice,
    total:total
   }).select("id").single();
