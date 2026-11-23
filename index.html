@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#172554">
+<link rel="manifest" href="./manifest.json">
 <title>Vyapar Book</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -81,6 +82,7 @@ header{padding:16px}
 <p id="loginMsg" class="msg"></p>
 </div>
 <button class="full" id="showRegisterBtn">Register Your Shop</button>
+ <button class="full hidden" id="installAppBtn" type="button" onclick="installApp()">📲 Install App</button>
 </section>
 
 <!-- REGISTER -->
@@ -262,6 +264,7 @@ header{padding:16px}
 <div class="card hidden" id="saleDetailCard">
 <button class="secondary" type="button" id="backToSalesBtn">← Back to Sales</button>
 <h2 style="margin-top:14px">Bill Details</h2>
+ <button class="full" type="button" onclick="window.print()">🖨️ Print / Download Bill PDF</button>
 <div id="saleDetailContent"></div>
 </div>
 </div>
@@ -855,6 +858,28 @@ $("logoutBtn2").onclick=logout;
   }
  }
 })();
+ 
+let deferredInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  let btn = document.getElementById("installAppBtn");
+  if (btn) btn.classList.remove("hidden");
+});
+
+async function installApp() {
+  if (!deferredInstallPrompt) {
+    alert("Chrome के मेन्यू में जाकर Add to Home screen चुनें।");
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+}
+
+</body>
+
 </script>
 </body>
 </html>
