@@ -308,6 +308,28 @@ td, th {
 </section>
 
 <!-- DASHBOARD -->
+ <section id="adminView" class="hidden">
+  <div class="card">
+    <h2>Super Admin Dashboard</h2>
+    <p>Welcome, Super Admin</p>
+    <p>Vyapar Book Management</p>
+  </div>
+
+  <div class="card">
+    <h3>Subscription Payment Requests</h3>
+    <div id="adminRequests">Loading...</div>
+  </div>
+
+  <div class="card">
+    <h3>Subscription Plans</h3>
+    <div id="adminPlans">Loading...</div>
+  </div>
+
+  <div class="card">
+    <h3>Shopkeepers</h3>
+    <div id="adminShops">Loading...</div>
+  </div>
+ </section>
 <section id="shopView" class="hidden">
 
 <div class="card">
@@ -519,6 +541,17 @@ function setLoading(btn,loading,text){
 }
 
 async function loadProfile(user){
+  const adminCheck = await db.rpc("is_vyapar_admin");
+
+ if(adminCheck.error){
+  throw new Error("Admin check failed: "+adminCheck.error.message);
+ }
+
+ if(adminCheck.data === true){
+  screen("adminView");
+  await loadAdminDashboard();
+  return;
+ }
  const p=await db.from("shop_profiles")
  .select("id,owner_name,email,phone,username,status,subscription_plan,subscription_expires_at")
  .eq("id",user.id).maybeSingle();
@@ -568,6 +601,109 @@ async function loadAllData(){
  await loadSales();
  updateDashboard();
 }
+
+function adminEscape(value){
+ return String(value ?? "").replace(/[&<>"']/g, ch => ({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+ }[ch]));
+}
+
+async function loadAdminDashboard(){
+ const requestsBox=$("adminRequests");
+ const plansBox=$("adminPlans");
+ const shopsBox=$("adminShops");
+
+ requestsBox.textContent="Loading...";
+ plansBox.textContent="Loading...";
+ shopsBox.textContent="Loading...";
+
+ const [r,p,s]=await Promise.all([
+  db.from("subscription_payment_requests")
+   .select("id,shop_id,plan_id,amount,status,requested_at")
+   .order("requested_at",{ascending:false}),
+  db.from("subscription_plans")
+   .select("id,name,duration_days,price,is_active")
+   .order("duration_days"),
+  db.from("shops")
+   .select("id,name,owner_name,owner_id,status,created_at")
+   .order("created_at",{ascending:false})
+ ]);
+
+ if(r.error) requestsBox.textContent="Requests Error: "+r.error.message;
+ else if(!r.data.length) requestsBox.textContent="No payment requests yet.";
+ else {
+  requestsBox.innerHTML=r.data.map(x=>`
+   <div class="card">
+    <b>Request:</b> ${adminEscape(x.id)}<br>
+    <b>Shop ID:</b> ${adminEscape(x.shop_id)}<br>
+    <b>Amount:</b> ₹${adminEscape(x.amount)}<br>
+    <b>Status:</b> ${adminEscape(x.status)}<br>
+    <b>Date:</b> ${adminEscape(x.requested_at)}
+    ${x.status==="pending" ? `
+     <button onclick="reviewVyaparPayment('${adminEscape(x.id)}','approve')">Approve</button>
+     <button class="danger" onclick="reviewVyaparPayment('${adminEscape(x.id)}','reject')">Reject</button>
+    ` : ""}
+   </div>
+  `).join("");
+ }
+
+ if(p.error) plansBox.textContent="Plans Error: "+p.error.message;
+ else if(!p.data.length) plansBox.textContent="No plans added yet.";
+ else {
+  plansBox.innerHTML=p.data.map(x=>`
+   <div class="card">
+    <b>${adminEscape(x.name)}</b><br>
+    Price: ₹${adminEscape(x.price)}<br>
+    Duration: ${adminEscape(x.duration_days)} days<br>
+    Status: ${x.is_active ? "Active":"Inactive"}
+   </div>
+  `).join("");
+ }
+
+ if(s.error) shopsBox.textContent="Shops Error: "+s.error.message;
+ else if(!s.data.length) shopsBox.textContent="No shops registered yet.";
+ else {
+  shopsBox.innerHTML=s.data.map(x=>`
+   <div class="card">
+    <b>${adminEscape(x.name)}</b><br>
+    Owner: ${adminEscape(x.owner_name)}<br>
+    Status: ${adminEscape(x.status)}<br>
+    Shop ID: ${adminEscape(x.id)}
+   </div>
+  `).join("");
+ }
+}
+
+async function reviewVyaparPayment(requestId, action){
+ if(action!=="approve" && action!=="reject") return;
+
+ const message=action==="approve"
+  ? "Kya aap payment verify karke subscription approve karna chahte hain?"
+  : "Kya aap is payment request ko reject karna chahte hain?";
+
+ if(!confirm(message)) return;
+
+ const rpcName=action==="approve"
+  ? "approve_vyapar_payment"
+  : "reject_vyapar_payment";
+
+ const result=await db.rpc(rpcName,{
+  p_request_id:requestId
+ });
+
+ if(result.error){
+  alert("Error: "+result.error.message);
+  return;
+ }
+
+ alert(action==="approve" ? "Subscription approved!" : "Request rejected!");
+ await loadAdminDashboard();
+}
+ 
 
 
 async function loadProducts(){
