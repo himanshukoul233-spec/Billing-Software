@@ -324,11 +324,8 @@ function setLoading(btn,loading,text){
  btn.textContent=loading?"Please wait...":text;
 }
 
-async function loadProfile(user){
- currentUser=user;
-
- const p=await db.from("shop_profiles")
- .select("id,owner_name,email,phone_,username,status,subscription_plan,subscription_expires")
+async function 
+ .select("id,owner_name,email,phone,username,status,subscription_plan,subscription_expires_at")
  .eq("id",user.id).maybeSingle();
 
  if(p.error)throw new Error("Profile database error: "+p.error.message);
