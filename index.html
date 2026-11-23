@@ -605,7 +605,55 @@ async function loadProfile(user){
  await loadAllData();
 }
 
+async function loadVyaparSubscription(){
+  const plansBox = $("subscriptionPlans");
+  const statusBox = $("mySubscriptionStatus");
 
+  plansBox.textContent = "Loading Plans...";
+  statusBox.textContent = "";
+
+  const { data: plans, error } = await db
+    .from("subscription_plans")
+    .select("id,name,duration_days,price")
+    .eq("is_active", true)
+    .order("duration_days");
+
+  if(error){
+    plansBox.textContent = "Plans Error: " + error.message;
+    return;
+  }
+
+  if(!plans || plans.length === 0){
+    plansBox.textContent = "No plans available.";
+    return;
+  }
+
+  plansBox.innerHTML = plans.map(plan => `
+    <div class="card">
+      <h3>${adminEscape(plan.name)}</h3>
+      <p>Duration: ${adminEscape(plan.duration_days)} Days</p>
+      <h2>₹${adminEscape(plan.price)}</h2>
+      <button onclick="selectVyaparPlan('${adminEscape(plan.id)}')">
+        Select Plan
+      </button>
+    </div>
+  `).join("");
+}
+
+async function selectVyaparPlan(planId){
+  const { data, error } = await db.rpc(
+    "request_vyapar_subscription",
+    { p_plan_id: planId }
+  );
+
+  if(error){
+    alert("Request Error: " + error.message);
+    return;
+  }
+
+  alert("Subscription request created successfully!");
+  await loadVyaparSubscription();
+}
 async function loadAllData(){
  await Promise.all([
   loadProducts(),
