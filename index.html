@@ -523,7 +523,7 @@ function msg(id,text,ok=false){
  if(el){el.textContent=text;el.style.color=ok?"#15803d":"#b91c1c";}
 }
 function screen(id){
- ["loginView","registerView","forgotView","resetView","shopView"].forEach(x=>$(x).classList.add("hidden"));
+ ["loginView","registerView","forgotView","resetView","shopView","adminView"].forEach(x=>$(x).classList.add("hidden"));
  $(id).classList.remove("hidden");
 }
 function money(n){
