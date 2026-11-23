@@ -740,7 +740,7 @@ $("saveBillBtn").onclick=async()=>{
    line_total:x.lineTotal
   }));
 
-  const itemResult=await db.from("shop_sale_item").insert(items);
+  const itemResult=await db.from("shop_sale_items").insert(items);
   if(itemResult.error){
    throw new Error("Bill header saved, but bill items failed: "+itemResult.error.message+". Please do not create the same bill again until checked.");
   }
