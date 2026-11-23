@@ -308,7 +308,7 @@ td, th {
 </section>
 
 <!-- DASHBOARD -->
-<section id="shopView" class="hidden">
+'x<section id="shopView" class="hidden">
 
 <div class="card">
 <div class="row" style="align-items:center">
@@ -367,9 +367,12 @@ td, th {
 <input id="billCustomerPhone" type="tel" placeholder="Enter mobile number">
 <label>Product</label>
 <div class="row">
-  <select id="billProduct">
-    <option value="">Select Product</option>
-  </select>
+  <input id="billProduct" type="text"
+ list="billProductOptions"
+ placeholder="Type Product Name"
+ autocomplete="off">
+
+<datalist id="billProductOptions"></datalist>
   <button type="button" id="billScanBtn">📷 Scan</button>
 </div>
 <div class="row">
@@ -676,8 +679,9 @@ async function openSaleDetails(saleId){
 
 
 function fillProductSelect(){
- $("billProduct").innerHTML='<option value="">Select Product</option>'+
- products.map(x=>'<option value="'+safe(x.id)+'">'+safe(x.name)+' - '+money(x.price)+'</option>').join("");
+ $("billProductOptions").innerHTML=products.map(x=>
+  '<option value="'+safe(x.name)+'"></option>'
+ ).join("");
 }
  function fillCustomerSelect(){
  $("customerOptions").innerHTML=customers.map(x=>
@@ -912,16 +916,15 @@ $("customerForm").addEventListener("submit",async e=>{
 });
 
 // PRODUCT SELECTION
-$("billProduct").addEventListener("change",()=>{
- const p=products.find(x=>x.id===$("billProduct").value);
+$("billProduct").addEventListener("input",()=>{
+ const name=$("billProduct").value.trim().toLowerCase();
+ const p=products.find(x=>x.name.trim().toLowerCase()===name);
  $("billPrice").value=p?Number(p.price):"";
 });
 
 // ADD TO CART
 $("addCartBtn").onclick=()=>{
- const p=products.find(x=>x.id===$("billProduct").value);
- const qty=Number($("billQty").value);
- const price=Number($("billPrice").value);
+ const p=products.find(x=>x.name.trim().toLowerCase()===$("billProduct").value.trim().toLowerCase());
 
  if(!p){msg("billMsg","Please select a product.");return;}
  if(!Number.isFinite(qty)||qty<=0){msg("billMsg","Enter a valid quantity.");return;}
@@ -1187,7 +1190,7 @@ document.getElementById("billScanBtn").addEventListener("click", () => {
       return;
     }
 
-    document.getElementById("billProduct").value = product.id;
+    document.getElementById("billProduct").value = product.name
     document.getElementById("billPrice").value = product.price;
     document.getElementById("billQty").value = 1;
 
