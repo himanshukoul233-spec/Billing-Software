@@ -10,6 +10,15 @@
 
 <style>
 *{box-sizing:border-box}
+ body, body *{
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+input, textarea{
+  -webkit-user-select:text;
+  user-select:text;
+}
 body{margin:0;background:#f1f5f9;color:#172033;font-family:Arial,sans-serif}
 header{background:#172554;color:white;padding:18px}
 header h1{margin:0;font-size:24px}
@@ -148,10 +157,11 @@ header{padding:16px}
 <p id="welcomeOwner" class="muted"></p>
 <p id="welcomeEmail" class="muted"></p>
 </div>
-<button class="danger" id="logoutBtn">Logout</button>
+ 
 </div>
 <div class="status" id="shopStatus">Shop account active</div>
-</div>
+</div> 
+ <button class="danger full" id="logoutBtn">Logout</button>
 
 <nav class="nav">
 <button class="active" data-page="homePage">🏠 Home</button>
