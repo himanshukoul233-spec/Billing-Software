@@ -888,5 +888,124 @@ if ("serviceWorker" in navigator) {
 }
 
 </script>
+ 
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+let vyaparScanner = null;
+
+async function startVyaparScan(onScanned) {
+  if (typeof Html5Qrcode === "undefined") {
+    alert("Barcode scanner load nahi hua. Internet check karein.");
+    return;
+  }
+
+  const oldBox = document.getElementById("vyaparScannerBox");
+  if (oldBox) oldBox.remove();
+
+  const box = document.createElement("div");
+  box.id = "vyaparScannerBox";
+  box.style.cssText =
+    "position:fixed;inset:0;background:white;z-index:99999;padding:20px;overflow:auto";
+
+  box.innerHTML = `
+    <h3>Barcode Scan Karein</h3>
+    <div id="vyaparReader" style="width:100%;max-width:450px;margin:auto"></div>
+    <button id="vyaparScanClose" style="padding:12px;margin-top:15px">
+      Band Karein
+    </button>
+  `;
+
+  document.body.appendChild(box);
+
+  document.getElementById("vyaparScanClose").onclick = async () => {
+    if (vyaparScanner) {
+      try { await vyaparScanner.stop(); } catch(e) {}
+      vyaparScanner = null;
+    }
+    box.remove();
+  };
+
+  vyaparScanner = new Html5Qrcode("vyaparReader");
+
+  try {
+    await vyaparScanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      async (barcode) => {
+        if (vyaparScanner) {
+          try { await vyaparScanner.stop(); } catch(e) {}
+          vyaparScanner = null;
+        }
+        box.remove();
+        onScanned(barcode);
+      },
+      () => {}
+    );
+  } catch (error) {
+    alert("Camera permission dein aur HTTPS par software kholein.");
+    box.remove();
+  }
+}
+</script>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+let vyaparScanner = null;
+
+async function startVyaparScan(onScanned) {
+  if (typeof Html5Qrcode === "undefined") {
+    alert("Barcode scanner load nahi hua. Internet check karein.");
+    return;
+  }
+
+  const oldBox = document.getElementById("vyaparScannerBox");
+  if (oldBox) oldBox.remove();
+
+  const box = document.createElement("div");
+  box.id = "vyaparScannerBox";
+  box.style.cssText =
+    "position:fixed;inset:0;background:white;z-index:99999;padding:20px;overflow:auto";
+
+  box.innerHTML = `
+    <h3>Barcode Scan Karein</h3>
+    <div id="vyaparReader" style="width:100%;max-width:450px;margin:auto"></div>
+    <button id="vyaparScanClose" style="padding:12px;margin-top:15px">
+      Band Karein
+    </button>
+  `;
+
+  document.body.appendChild(box);
+
+  document.getElementById("vyaparScanClose").onclick = async () => {
+    if (vyaparScanner) {
+      try { await vyaparScanner.stop(); } catch(e) {}
+      vyaparScanner = null;
+    }
+    box.remove();
+  };
+
+  vyaparScanner = new Html5Qrcode("vyaparReader");
+
+  try {
+    await vyaparScanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      async (barcode) => {
+        if (vyaparScanner) {
+          try { await vyaparScanner.stop(); } catch(e) {}
+          vyaparScanner = null;
+        }
+        box.remove();
+        onScanned(barcode);
+      },
+      () => {}
+    );
+  } catch (error) {
+    alert("Camera permission dein aur HTTPS par software kholein.");
+    box.remove();
+  }
+}
+</script>
+
 </body>
 </html>
