@@ -335,7 +335,7 @@ async function loadProfile(user){
  profile=p.data;
 
  const s=await db.from("shops")
- .select("id,name,owner_id,status,trials_ends_at,created_at,owner_name,username")
+ .select("id,name,owner_id,status,trial_ends_at,created_at,owner_name,username")
  .eq("owner_id",user.id).maybeSingle();
 
  if(s.error)throw new Error("Shop database error: "+s.error.message);
@@ -358,7 +358,7 @@ async function loadProfile(user){
  $("settingEmail").textContent="Email: "+(profile.email||user.email||"-");
  $("settingUsername").textContent="Username: "+(profile.username||shop.username||"-");
  $("settingPlan").textContent="Plan: "+(profile.subscription_plan||"Not selected");
- $("settingExpiry").textContent="Subscription expiry: "+dateText(profile.subscription_expires||shop.trials_ends_at);
+ $("settingExpiry").textContent="Subscription expiry: "+dateText(profile.subscription_expires||shop.trial_ends_at);
  $("settingStatus").textContent="Status: "+(profile.status||shop.status||"-");
 
  screen("shopView");
