@@ -311,6 +311,9 @@ td, th {
  <section id="adminView" class="hidden">
   <div class="card">
     <h2>Super Admin Dashboard</h2>
+   <button class="danger" id="adminLogoutBtn" onclick="adminLogout()">
+  Logout
+   </button>
     <p>Welcome, Super Admin</p>
     <p>Vyapar Book Management</p>
   </div>
@@ -703,6 +706,16 @@ async function reviewVyaparPayment(requestId, action){
  alert(action==="approve" ? "Subscription approved!" : "Request rejected!");
  await loadAdminDashboard();
 }
+ async function adminLogout(){
+ const { error } = await db.auth.signOut();
+
+ if(error){
+  alert("Logout failed: "+error.message);
+  return;
+ }
+
+ location.reload();
+ }
  
 
 
