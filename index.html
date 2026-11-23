@@ -230,7 +230,8 @@ header{padding:16px}
 <div><label>Cost Price</label><input name="cost" type="number" min="0" step="0.01" value="0"></div>
 </div>
 <label>GST Percentage</label>
-<input name="gst_percent" type="number" min="0" step="0.01" value="0">
+<label>Opening Stock *</label>
+<input name="stock" type="number" min="0" step="1" value="0" required>
 <button class="full" id="addProductBtn">Save Product</button>
 </form>
 <p id="productMsg" class="msg"></p>
@@ -396,7 +397,7 @@ async function loadAllData(){
 
 async function loadProducts(){
  const r=await db.from("shop_products")
- .select("id,shop_id,name,barcode,price,cost,gst_percent,created_at")
+ .select("id,shop_id,name,barcode,price,cost,gst_percent,stock,created_at")
  .eq("shop_id",shopId).order("created_at",{ascending:false});
 
  if(r.error)throw new Error("Products: "+r.error.message);
@@ -445,10 +446,14 @@ function updateDashboard(){
 }
 
 function renderProducts(){
- $("productList").innerHTML=products.length?
- '<table><tr><th>Product</th><th>Barcode</th><th>Price</th><th>GST</th></tr>'+
- products.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.barcode||"-")+'</td><td>'+money(x.price)+'</td><td>'+Number(x.gst_percent||0)+'%</td></tr>').join("")+
- '</table>':tableEmpty("No products added yet");
+  $("productList").innerHTML=products.length?
+  '<table><tr><th>Product</th><th>Barcode</th><th>Price</th><th>Stock Status</th><th>Stock</th></tr>'+
+  products.map(x=>{
+    const stock=Number(x.stock||0);
+    const status=stock<=0?"Out of Stock":stock<=5?"Low Stock":"In Stock";
+    return '<tr><td>'+safe(x.name)+'</td><td>'+safe(x.barcode||"-")+'</td><td>'+money(x.price)+'</td><td>'+status+'</td><td>'+stock+'</td></tr>';
+  }).join("")+
+  '</table>':tableEmpty("No products added yet");
 }
 
 function renderCustomers(){
