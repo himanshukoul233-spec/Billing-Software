@@ -194,9 +194,12 @@ header{padding:16px}
 <option value="">Walk-in Customer</option>
 </select>
 <label>Product</label>
-<select id="billProduct">
-<option value="">Select Product</option>
-</select>
+<div class="row">
+  <select id="billProduct">
+    <option value="">Select Product</option>
+  </select>
+  <button type="button" id="billScanBtn">📷 Scan</button>
+</div>
 <div class="row">
 <div><label>Quantity</label><input type="number" id="billQty" min="1" value="1"></div>
 <div><label>Unit Price (₹)</label><input type="number" id="billPrice" min="0" step="0.01"></div>
@@ -217,7 +220,11 @@ header{padding:16px}
 <label>Product Name *</label>
 <input name="name" required>
 <label>Barcode</label>
-<input name="barcode">
+<div class="row">
+  <input name="barcode" id="productBarcode">
+  <button type="button" id="productScanBtn">📷 Scan</button>
+</div>
+
 <div class="row">
 <div><label>Selling Price *</label><input name="price" type="number" min="0" step="0.01" required></div>
 <div><label>Cost Price</label><input name="cost" type="number" min="0" step="0.01" value="0"></div>
@@ -946,6 +953,32 @@ async function startVyaparScan(onScanned) {
     box.remove();
   }
 }
+ // PRODUCTS BARCODE SCAN
+document.getElementById("productScanBtn").addEventListener("click", () => {
+  startVyaparScan((barcode) => {
+    document.getElementById("productBarcode").value = barcode;
+  });
+});
+
+// BILLING BARCODE SCAN
+document.getElementById("billScanBtn").addEventListener("click", () => {
+  startVyaparScan((barcode) => {
+    const product = products.find(
+      p => String(p.barcode || "").trim() === String(barcode).trim()
+    );
+
+    if (!product) {
+      alert("Yeh barcode wala product abhi Products mein save nahi hai.");
+      return;
+    }
+
+    document.getElementById("billProduct").value = product.id;
+    document.getElementById("billPrice").value = product.price;
+    document.getElementById("billQty").value = 1;
+
+    document.getElementById("addCartBtn").click();
+  });
+});
 </script>
 
 
