@@ -359,10 +359,12 @@ td, th {
 <div id="billingPage" class="page hidden">
 <div class="card">
 <h2>New Billing</h2>
-<label>Customer</label>
-<select id="billCustomer">
-<option value="">Walk-in Customer</option>
-</select>
+<label>Customer Name</label>
+<input id="billCustomerName" type="text" placeholder="Enter customer name" list="customerOptions" autocomplete="off">
+<datalist id="customerOptions"></datalist>
+
+<label>Phone Number</label>
+<input id="billCustomerPhone" type="tel" placeholder="Enter mobile number">
 <label>Product</label>
 <div class="row">
   <select id="billProduct">
@@ -578,7 +580,7 @@ async function loadProducts(){
 
 async function loadCustomers(){
  const r=await db.from("shop_customers")
- .select("id,shop_id,name,email,created_at")
+ .select("id,shop_id,name,email,phone,created_at")
  .eq("shop_id",shopId).order("created_at",{ascending:false});
 
  if(r.error)throw new Error("Customers: "+r.error.message);
@@ -628,8 +630,8 @@ function renderProducts(){
 
 function renderCustomers(){
  $("customerList").innerHTML=customers.length?
- '<table><tr><th>Name</th><th>Email</th><th>Added</th></tr>'+
- customers.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.email||"-")+'</td><td>'+dateText(x.created_at)+'</td></tr>').join("")+
+ '<table><tr><th>Name</th><th>Phone</th><th>Email</th><th>Added</th></tr>'+
+ customers.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.phone||"-")+'</td><td>'+safe(x.email||"-")+'</td><td>'+dateText(x.created_at)+'</td></tr>').join("")+
  '</table>':tableEmpty("No customers added yet");
 }
 
@@ -677,10 +679,17 @@ function fillProductSelect(){
  $("billProduct").innerHTML='<option value="">Select Product</option>'+
  products.map(x=>'<option value="'+safe(x.id)+'">'+safe(x.name)+' - '+money(x.price)+'</option>').join("");
 }
-function fillCustomerSelect(){
- $("billCustomer").innerHTML='<option value="">Walk-in Customer</option>'+
- customers.map(x=>'<option value="'+safe(x.id)+'">'+safe(x.name)+'</option>').join("");
+ function fillCustomerSelect(){
+ $("customerOptions").innerHTML=customers.map(x=>
+  '<option value="'+safe(x.name)+'"></option>'
+ ).join("");
 }
+
+$("billCustomerName").addEventListener("change",()=>{
+ const name=$("billCustomerName").value.trim().toLowerCase();
+ const existing=customers.find(x=>x.name.trim().toLowerCase()===name);
+ $("billCustomerPhone").value=existing?.phone||"";
+});
 
 function renderCart(){
  $("cartList").innerHTML=cart.length?
@@ -945,7 +954,35 @@ $("saveBillBtn").onclick=async()=>{
 
  try{
   const total=cart.reduce((a,x)=>a+x.lineTotal,0);
-  const customerId=$("billCustomer").value||null;
+  const customerName=$("billCustomerName").value.trim();
+const customerPhone=$("billCustomerPhone").value.trim();
+let customerId=null;
+
+if(customerName){
+ let existing=customers.find(x=>
+  x.name.trim().toLowerCase()===customerName.toLowerCase() &&
+  (!customerPhone || x.phone===customerPhone)
+ );
+
+ if(existing){
+  customerId=existing.id;
+  if(customerPhone && customerPhone!==(existing.phone||"")){
+   const upd=await db.from("shop_customers")
+    .update({phone:customerPhone})
+    .eq("id",existing.id).eq("shop_id",shopId);
+   if(upd.error)throw upd.error;
+  }
+ }else{
+  const created=await db.from("shop_customers").insert({
+   shop_id:shopId,
+   name:customerName,
+   phone:customerPhone||null
+  }).select("id").single();
+
+  if(created.error)throw created.error;
+  customerId=created.data.id;
+ }
+}
   const invoice="VB-"+Date.now();
 
   const sale=await db.from("shop_sales").insert({
@@ -976,6 +1013,9 @@ $("saveBillBtn").onclick=async()=>{
   const savedTotal=money(total);
   cart=[];
   renderCart();
+  $("billCustomerName").value="";
+$("billCustomerPhone").value="";
+await loadCustomers();
   $("billCustomer").value="";
   msg("billMsg","Bill saved successfully! Invoice: "+invoice+" | Total: "+savedTotal,true);
 
