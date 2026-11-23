@@ -730,7 +730,7 @@ $("saveBillBtn").onclick=async()=>{
   if(sale.error)throw sale.error;
 
   const items=cart.map(x=>({
-   sales_id:sale.data.id,
+   sale_id:sale.data.id,
    shop_id:shopId,
    product_id:x.id,
    product_name:x.name,
@@ -740,7 +740,7 @@ $("saveBillBtn").onclick=async()=>{
    line_total:x.lineTotal
   }));
 
-  const itemResult=await db.from("shop_sales_item").insert(items);
+  const itemResult=await db.from("shop_sale_item").insert(items);
   if(itemResult.error){
    throw new Error("Bill header saved, but bill items failed: "+itemResult.error.message+". Please do not create the same bill again until checked.");
   }
