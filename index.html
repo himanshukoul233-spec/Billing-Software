@@ -252,12 +252,20 @@ header{padding:16px}
 </div>
 
 <!-- SALES -->
+
 <div id="salesPage" class="page hidden">
-<div class="card">
+<div class="card" id="salesHistoryCard">
 <h2>Sales History</h2>
+<p class="muted">Open any bill to see customer and product details.</p>
 <div id="salesList" class="tablewrap"></div>
 </div>
+<div class="card hidden" id="saleDetailCard">
+<button class="secondary" type="button" id="backToSalesBtn">← Back to Sales</button>
+<h2 style="margin-top:14px">Bill Details</h2>
+<div id="saleDetailContent"></div>
 </div>
+</div>
+
 
 <!-- SETTINGS -->
 <div id="settingsPage" class="page hidden">
@@ -365,14 +373,16 @@ async function loadProfile(user){
  await loadAllData();
 }
 
+
 async function loadAllData(){
  await Promise.all([
   loadProducts(),
-  loadCustomers(),
-  loadSales()
+  loadCustomers()
  ]);
+ await loadSales();
  updateDashboard();
 }
+
 
 async function loadProducts(){
  const r=await db.from("shop_products")
@@ -438,12 +448,45 @@ function renderCustomers(){
  '</table>':tableEmpty("No customers added yet");
 }
 
+
 function renderSales(){
  $("salesList").innerHTML=sales.length?
- '<table><tr><th>Invoice</th><th>Date</th><th>Total</th></tr>'+
- sales.map(x=>'<tr><td>'+safe(x.invoice_no)+'</td><td>'+dateText(x.created_at)+'</td><td>'+money(x.total)+'</td></tr>').join("")+
+ '<table><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Action</th></tr>'+
+ sales.map(x=>{
+  const customer=customers.find(c=>c.id===x.customer_id);
+  return '<tr><td>'+safe(x.invoice_no)+'</td><td>'+dateText(x.created_at)+'</td><td>'+safe(customer?customer.name:"Walk-in Customer")+'</td><td>'+money(x.total)+'</td><td><button type="button" class="viewSaleBtn" data-sale-id="'+safe(x.id)+'">View Bill</button></td></tr>';
+ }).join("")+
  '</table>':tableEmpty("No sales found");
 }
+
+async function openSaleDetails(saleId){
+ const sale=sales.find(x=>x.id===saleId);
+ if(!sale)return;
+ const content=$("saleDetailContent");
+ content.innerHTML='<p class="muted">Loading bill details...</p>';
+ $("salesHistoryCard").classList.add("hidden");
+ $("saleDetailCard").classList.remove("hidden");
+ try{
+  const result=await db.from("shop_sale_items")
+   .select("product_name,quantity,unit_price,gst_percent,line_total")
+   .eq("sale_id",saleId).eq("shop_id",shopId);
+  if(result.error)throw result.error;
+  const customer=customers.find(c=>c.id===sale.customer_id);
+  const rows=result.data||[];
+  content.innerHTML=
+   '<div class="status" style="background:#eff6ff;color:#172554"><b>Invoice:</b> '+safe(sale.invoice_no)+'<br><b>Date:</b> '+dateText(sale.created_at)+'<br><b>Customer:</b> '+safe(customer?customer.name:"Walk-in Customer")+(customer&&customer.email?'<br><b>Email:</b> '+safe(customer.email):'')+'</div>'+
+   '<h3 style="margin-top:16px">Items Purchased</h3>'+
+   (rows.length?
+    '<div class="tablewrap"><table><tr><th>Product</th><th>Qty</th><th>Price</th><th>GST</th><th>Total</th></tr>'+
+    rows.map(i=>'<tr><td>'+safe(i.product_name)+'</td><td>'+Number(i.quantity||0)+'</td><td>'+money(i.unit_price)+'</td><td>'+Number(i.gst_percent||0)+'%</td><td>'+money(i.line_total)+'</td></tr>').join("")+
+    '</table></div>':
+    tableEmpty("No item details found for this bill"))+
+   '<h3 style="text-align:right;margin-top:16px">Bill Total: '+money(sale.total)+'</h3>';
+ }catch(err){
+  content.innerHTML='<p class="msg">Could not load bill details: '+safe(err.message||err)+'</p>';
+ }
+}
+
 
 function fillProductSelect(){
  $("billProduct").innerHTML='<option value="">Select Product</option>'+
@@ -760,7 +803,17 @@ $("saveBillBtn").onclick=async()=>{
  }
 };
 
-// LOGOUT
+// SALES BILL DETAILS
+$("salesList").addEventListener("click",async(event)=>{
+ const button=event.target.closest("[data-sale-id]");
+ if(button)await openSaleDetails(button.getAttribute("data-sale-id"));
+});
+$("backToSalesBtn").onclick=()=>{
+ $("saleDetailCard").classList.add("hidden");
+ $("salesHistoryCard").classList.remove("hidden");
+};
+
+// LOGOUT 
 async function logout(){
  const {error}=await db.auth.signOut();
  if(error){alert(error.message);return;}
