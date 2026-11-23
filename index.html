@@ -645,10 +645,53 @@ async function loadVyaparSubscription(){
   `).join("");
 }
 
+
+let selectedVyaparPlanId = null;
+
 async function selectVyaparPlan(planId){
+  selectedVyaparPlanId = planId;
+
+  const box = $("subscriptionpaymentbox");
+
+  if(!box){
+    alert("Payment screen not found");
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="card">
+      <h3>Complete Your Payment</h3>
+      <p>Your selected subscription plan is ready.</p>
+
+      <div style="padding:20px;text-align:center;border:1px dashed #999;border-radius:12px">
+        <h3>UPI QR Code</h3>
+        <p>QR Code Coming Soon</p>
+      </div>
+
+      <h3>UPI ID</h3>
+      <p>UPI ID Coming Soon</p>
+
+      <button class="full" onclick="confirmVyaparPayment()">
+        Payment Done
+      </button>
+
+      <button class="danger full"
+        onclick="$('subscriptionpaymentbox').innerHTML=''">
+        Cancel
+      </button>
+    </div>
+  `;
+}
+
+async function confirmVyaparPayment(){
+  if(!selectedVyaparPlanId){
+    alert("Please select a plan first");
+    return;
+  }
+
   const { data, error } = await db.rpc(
     "request_vyapar_subscription",
-    { p_plan_id: planId }
+    { p_plan_id: selectedVyaparPlanId }
   );
 
   if(error){
@@ -656,9 +699,13 @@ async function selectVyaparPlan(planId){
     return;
   }
 
-  alert("Subscription request created successfully!");
+  selectedVyaparPlanId = null;
+  alert("Payment request sent to Admin for verification!");
+
+  $("subscriptionpaymentbox").innerHTML = "";
   await loadVyaparSubscription();
 }
+
 async function loadAllData(){
  await Promise.all([
   loadProducts(),
