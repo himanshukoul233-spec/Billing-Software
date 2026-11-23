@@ -386,7 +386,7 @@ async function loadProducts(){
 }
 
 async function loadCustomers(){
- const r=await db.from("shop_customer")
+ const r=await db.from("shop_customers")
  .select("id,shop_id,name,email,created_at")
  .eq("shop_id",shopId).order("created_at",{ascending:false});
 
@@ -657,7 +657,7 @@ $("customerForm").addEventListener("submit",async e=>{
 
  const f=new FormData(e.target);
  try{
-  const {error}=await db.from("shop_customer").insert({
+  const {error}=await db.from("shop_customers").insert({
    shop_id:shopId,
    name:f.get("name").trim(),
    email:f.get("email").trim()||null
