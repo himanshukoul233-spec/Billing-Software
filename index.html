@@ -1757,6 +1757,19 @@ $("saveBillBtn").onclick=async()=>{
 
  try{
   const total=cart.reduce((a,x)=>a+x.lineTotal,0);
+  const paymentStatus=$("paymentStatus").value;
+let receivedAmount=0;
+
+if(paymentStatus==="Paid"){
+  receivedAmount=total;
+}else if(paymentStatus==="Udhar"){
+  receivedAmount=0;
+}else{
+  receivedAmount=Number($("receivedAmount").value||0);
+  if(receivedAmount<=0 || receivedAmount>=total){
+    throw new Error("Partial payment में मिली हुई रकम कुल बिल से कम और शून्य से ज्यादा होनी चाहिए।");
+  }
+}
   const customerName=$("billCustomerName").value.trim();
 const customerPhone=$("billCustomerPhone").value.trim();
 let customerId=null;
