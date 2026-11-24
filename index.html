@@ -935,16 +935,47 @@ async function loadSales(){
  renderSales();
 }
 
+
 function updateDashboard(){
  const total=sales.reduce((a,b)=>a+Number(b.total||0),0);
- const today=new Date().toDateString();
- const todayTotal=sales.filter(x=>new Date(x.created_at).toDateString()===today)
- .reduce((a,b)=>a+Number(b.total||0),0);
+ const now=new Date();
+
+ const todayTotal=sales.filter(x=>{
+   const d=new Date(x.created_at);
+   return d.toDateString()===now.toDateString();
+ }).reduce((a,b)=>a+Number(b.total||0),0);
+
+ const monthTotal=sales.filter(x=>{
+   const d=new Date(x.created_at);
+   return d.getMonth()===now.getMonth() &&
+          d.getFullYear()===now.getFullYear();
+ }).reduce((a,b)=>a+Number(b.total||0),0);
+
+ const yearTotal=sales.filter(x=>{
+   return new Date(x.created_at).getFullYear()===now.getFullYear();
+ }).reduce((a,b)=>a+Number(b.total||0),0);
 
  $("totalSales").textContent=money(total);
  $("todaySales").textContent=money(todayTotal);
  $("totalProducts").textContent=products.length;
  $("totalCustomers").textContent=customers.length;
+
+ $("dailySales").textContent=money(todayTotal);
+ $("monthlySales").textContent=money(monthTotal);
+ $("yearlySales").textContent=money(yearTotal);
+
+ const out=products.filter(x=>Number(x.stock||0)<=0);
+ const low=products.filter(x=>Number(x.stock||0)>0 && Number(x.stock||0)<=5);
+
+ $("outOfStockList").innerHTML=out.length?
+ '<div class="tablewrap"><table><tr><th>Product</th><th>Barcode</th><th>Stock</th></tr>'+
+ out.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.barcode||"-")+'</td><td>0</td></tr>').join("")+
+ '</table></div>':tableEmpty("No out of stock products");
+
+ $("lowStockList").innerHTML=low.length?
+ '<div class="tablewrap"><table><tr><th>Product</th><th>Barcode</th><th>Stock</th></tr>'+
+ low.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.barcode||"-")+'</td><td>'+Number(x.stock||0)+'</td></tr>').join("")+
+ '</table></div>':tableEmpty("No low stock products");
 
  const recent=sales.slice(0,5);
  $("recentSales").innerHTML=recent.length?
@@ -952,6 +983,7 @@ function updateDashboard(){
  recent.map(x=>'<tr><td>'+safe(x.invoice_no)+'</td><td>'+dateText(x.created_at)+'</td><td>'+money(x.total)+'</td></tr>').join("")+
  '</table>':tableEmpty("No sales yet");
 }
+
 
 function renderProducts(){
   $("productList").innerHTML=products.length?
