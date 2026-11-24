@@ -1240,7 +1240,8 @@ $("productForm").addEventListener("submit",async e=>{
    barcode:f.get("barcode").trim()||null,
    price:Number(f.get("price")),
    cost:Number(f.get("cost")||0),
-   gst_percent:Number(f.get("gst_percent")||0)
+   gst_percent:Number(f.get("gst_percent")||0),
+stock:Number(f.get("stock")||0)
   });
   if(error)throw error;
   e.target.reset();
