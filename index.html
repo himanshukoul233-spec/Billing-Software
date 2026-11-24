@@ -452,6 +452,61 @@ td, th {
 </div>
 
 <!-- PRODUCTS -->
+ 
+<!-- PURCHASE -->
+<div id="purchasePage" class="page hidden">
+  <div class="card">
+    <h2>🛒 New Purchase</h2>
+
+    <label>Supplier Name</label>
+    <input id="purchaseSupplier" placeholder="Supplier name">
+
+    <label>Invoice Number</label>
+    <input id="purchaseInvoice" placeholder="Invoice number">
+
+    <label>Product Name</label>
+    <input id="purchaseProduct" list="purchaseProductOptions"
+      placeholder="Enter product name" autocomplete="off">
+    <datalist id="purchaseProductOptions"></datalist>
+
+    <label>Barcode</label>
+    <div class="row">
+      <input id="purchaseBarcode" placeholder="Scan or enter barcode">
+      <button type="button" id="purchaseScanBtn">📷 Scan</button>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Quantity</label>
+        <input id="purchaseQty" type="number" min="1" value="1">
+      </div>
+      <div>
+        <label>Unit Cost (₹)</label>
+        <input id="purchaseCost" type="number" min="0" step="0.01">
+      </div>
+    </div>
+
+    <button type="button" class="full" id="addPurchaseItemBtn">
+      Add Product
+    </button>
+
+    <div id="purchaseCartList"></div>
+
+    <h3>Total Purchase: <span id="purchaseTotal">₹0.00</span></h3>
+
+    <button type="button" class="full" id="savePurchaseBtn">
+      Save Purchase
+    </button>
+
+    <p id="purchaseMsg" class="msg"></p>
+  </div>
+
+  <div class="card">
+    <h3>Purchase History</h3>
+    <div id="purchaseHistory" class="tablewrap"></div>
+  </div>
+</div>
+
 <div id="productsPage" class="page hidden">
 <div class="card">
 <h2>Add New Product</h2>
