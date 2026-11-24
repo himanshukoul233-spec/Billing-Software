@@ -702,24 +702,30 @@ async function selectVyaparPlan(planId){
       <h3>Complete Your Payment</h3>
       <p>Your selected subscription plan is ready.</p>
 
-      <div style="padding:20px;text-align:center;border:1px dashed #999;border-radius:12px">
-        <h3>UPI QR Code</h3>
-        <p>QR Code Coming Soon</p>
-      </div>
+      
+<div style="padding:20px;text-align:center;border:1px solid #bfdbfe;border-radius:12px;background:#eff6ff">
+  <h3>Scan UPI QR Code</h3>
+  <img src="./Screenshot_20261124_204921_Paytm.jpg"
+       alt="UPI QR Code"
+       style="width:220px;max-width:100%;border-radius:10px;background:white;padding:8px">
 
-      <h3>UPI ID</h3>
-      <p>UPI ID Coming Soon</p>
+  <h3>UPI ID</h3>
+  <p style="font-weight:bold;font-size:18px">6269842704@ptyes</p>
 
-      <button class="full" onclick="confirmVyaparPayment()">
-        Payment Done
-      </button>
+  <button class="full" onclick="navigator.clipboard.writeText('6269842704@ptyes').then(()=>alert('UPI ID Copied'))">
+    Copy UPI ID
+  </button>
 
-      <button class="danger full"
-        onclick="$('subscriptionpaymentbox').innerHTML=''">
-        Cancel
-      </button>
-    </div>
-  `;
+  <button class="full" onclick="confirmVyaparPayment()">
+    Payment Done
+  </button>
+
+  <button class="danger full"
+    onclick="$('subscriptionpaymentbox').innerHTML=''">
+    Cancel
+  </button>
+</div>
+
 }
 
 async function confirmVyaparPayment(){
