@@ -1110,7 +1110,60 @@ function fillPurchaseProductSelect(){
   '<option value="'+safe(x.name)+'"></option>'
  ).join("");
 }
+function renderPurchaseCart(){
+ $("purchaseCartList").innerHTML=purchaseCart.length?
+ '<div class="tablewrap"><table><tr><th>Product</th><th>Qty</th><th>Cost</th><th>Total</th><th></th></tr>'+
+ purchaseCart.map((x,i)=>
+ '<tr><td>'+safe(x.name)+'</td><td>'+x.quantity+'</td><td>'+money(x.unitCost)+'</td><td>'+money(x.lineTotal)+'</td><td><button type="button" class="danger removePurchase" data-index="'+i+'">X</button></td></tr>'
+ ).join("")+
+ '</table></div>':tableEmpty("No products added");
 
+ $("purchaseTotal").textContent=money(
+  purchaseCart.reduce((a,x)=>a+x.lineTotal,0)
+ );
+
+ document.querySelectorAll(".removePurchase").forEach(b=>{
+  b.addEventListener("click",()=>{
+   purchaseCart.splice(Number(b.dataset.index),1);
+   renderPurchaseCart();
+  });
+ });
+}
+
+$("purchaseProduct").addEventListener("input",()=>{
+ const name=$("purchaseProduct").value.trim().toLowerCase();
+ const p=products.find(x=>x.name.trim().toLowerCase()===name);
+ $("purchaseBarcode").value=p?(p.barcode||""):"";
+ $("purchaseCost").value=p?Number(p.cost||0):"";
+});
+
+$("addPurchaseItemBtn").onclick=()=>{
+ const p=products.find(x=>
+  x.name.trim().toLowerCase()===$("purchaseProduct").value.trim().toLowerCase()
+ );
+ const qty=Number($("purchaseQty").value);
+ const cost=Number($("purchaseCost").value);
+
+ if(!p){msg("purchaseMsg","Please select a saved product.");return;}
+ if(!Number.isInteger(qty)||qty<=0){msg("purchaseMsg","Enter valid quantity.");return;}
+ if(!Number.isFinite(cost)||cost<0){msg("purchaseMsg","Enter valid cost price.");return;}
+
+ purchaseCart.push({
+  id:p.id,
+  name:p.name,
+  barcode:p.barcode||"",
+  quantity:qty,
+  unitCost:cost,
+  lineTotal:qty*cost
+ });
+
+ $("purchaseProduct").value="";
+ $("purchaseBarcode").value="";
+ $("purchaseQty").value=1;
+ $("purchaseCost").value="";
+ renderPurchaseCart();
+ msg("purchaseMsg","Product added!",true);
+};
  function fillCustomerSelect(){
  $("customerOptions").innerHTML=customers.map(x=>
   '<option value="'+safe(x.name)+'"></option>'
