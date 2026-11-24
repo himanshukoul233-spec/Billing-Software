@@ -978,6 +978,7 @@ async function loadCustomers(){
  customers=r.data||[];
  renderCustomers();
  fillCustomerSelect();
+ fillPurchaseProductSelect();
 }
 
 async function loadSales(){
@@ -1099,6 +1100,11 @@ async function openSaleDetails(saleId){
 
 
 function fillProductSelect(){
+ function fillPurchaseProductSelect(){
+ $("purchaseProductOptions").innerHTML=products.map(x=>
+  '<option value="'+safe(x.name)+'"></option>'
+ ).join("");
+ }
  $("billProductOptions").innerHTML=products.map(x=>
   '<option value="'+safe(x.name)+'"></option>'
  ).join("");
