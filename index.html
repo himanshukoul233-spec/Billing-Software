@@ -1828,7 +1828,32 @@ if(customerName){
   if(itemResult.error){
    throw new Error("Bill header saved, but bill items failed: "+itemResult.error.message+". Please do not create the same bill again until checked.");
   }
+  const balanceAmount=total-receivedAmount;
 
+if(balanceAmount>0){
+  const dueResult=await db.from("shop_customer_dues").insert({
+    shop_id:shopId,
+    sale_id:sale.data.id,
+    customer_id:customerId,
+    customer_name:customerName,
+    customer_phone:customerPhone||null,
+    total_amount:total,
+    paid_amount:receivedAmount
+  }).select("id").single();
+
+  if(dueResult.error)throw dueResult.error;
+
+  if(receivedAmount>0){
+    const paymentResult=await db.from("shop_customer_payments").insert({
+      due_id:dueResult.data.id,
+      shop_id:shopId,
+      amount:receivedAmount,
+      payment_mode:"Cash"
+    });
+
+    if(paymentResult.error)throw paymentResult.error;
+  }
+}
   const savedTotal=money(total);
   cart=[];
   renderCart();
