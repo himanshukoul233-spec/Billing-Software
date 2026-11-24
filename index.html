@@ -1190,6 +1190,7 @@ $("savePurchaseBtn").onclick=async()=>{
   const items=purchaseCart.map(x=>({
    purchase_id:header.data.id,
    product_id:x.id,
+   product_name:x.name,
    shop_id:shopId,
    barcode:x.barcode||null,
    quantity:x.quantity,
