@@ -841,6 +841,7 @@ async function loadAllData(){
   loadCustomers()
  ]);
  await loadSales();
+ await loadPurchaseHistory();
  updateDashboard();
 }
 
@@ -1266,6 +1267,34 @@ function renderCart(){
    renderCart();
   });
  });
+}
+ // PURCHASE HISTORY
+async function loadPurchaseHistory(){
+ const box=$("purchaseHistory");
+ box.textContent="Loading...";
+
+ const {data,error}=await db.from("shop_purchases")
+  .select("id,supplier_name,invoice_number,total,created_at")
+  .eq("shop_id",shopId)
+  .order("created_at",{ascending:false});
+
+ if(error){
+  box.textContent="History Error: "+error.message;
+  return;
+ }
+
+ if(!data.length){
+  box.innerHTML=tableEmpty("No purchases yet");
+  return;
+ }
+
+ box.innerHTML='<table><tr><th>Date</th><th>Supplier</th><th>Invoice</th><th>Total</th></tr>'+
+ data.map(x=>
+  '<tr><td>'+safe(new Date(x.created_at).toLocaleString())+
+  '</td><td>'+safe(x.supplier_name||"-")+
+  '</td><td>'+safe(x.invoice_number||"-")+
+  '</td><td>'+money(x.total)+'</td></tr>'
+ ).join("")+'</table>';
 }
 
 function navigate(page){
