@@ -1984,7 +1984,7 @@ $("logoutBtn2").onclick=logout;
   return;
  }
 
- screen("loginView");
+ screen("loadingView");
 
  const {data,error}=await db.auth.getSession();
  if(error){
