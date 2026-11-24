@@ -1986,6 +1986,7 @@ $("logoutBtn2").onclick=logout;
 
  screen("loadingView");
 
+ 
  const {data,error}=await db.auth.getSession();
  if(error){
   msg("loginMsg",error.message);
@@ -2001,7 +2002,6 @@ $("logoutBtn2").onclick=logout;
   }
  }
 })();
- 
 let deferredInstallPrompt = null;
 
 window.addEventListener("beforeinstallprompt", (event) => {
