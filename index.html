@@ -1104,6 +1104,7 @@ function updateDashboard(){
  '<table><tr><th>Invoice</th><th>Date</th><th>Total</th></tr>'+
  recent.map(x=>'<tr><td>'+safe(x.invoice_no)+'</td><td>'+dateText(x.created_at)+'</td><td>'+money(x.total)+'</td></tr>').join("")+
  '</table>':tableEmpty("No sales yet");
+ renderCustomerSalesReport();
 }
 async function renderCustomerSalesReport(){
   const period=$("salesReportPeriod").value;
