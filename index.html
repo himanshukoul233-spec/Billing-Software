@@ -1772,6 +1772,9 @@ if(paymentStatus==="Paid"){
 }
   const customerName=$("billCustomerName").value.trim();
 const customerPhone=$("billCustomerPhone").value.trim();
+  if(total-receivedAmount>0 && !customerName){
+  throw new Error("उधार या Partial पेमेंट के लिए ग्राहक का नाम भरना जरूरी है।");
+  }
 let customerId=null;
 
 if(customerName){
