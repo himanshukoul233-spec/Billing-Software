@@ -1164,6 +1164,83 @@ $("addPurchaseItemBtn").onclick=()=>{
  renderPurchaseCart();
  msg("purchaseMsg","Product added!",true);
 };
+ // SAVE PURCHASE
+$("savePurchaseBtn").onclick=async()=>{
+ if(!purchaseCart.length){
+  msg("purchaseMsg","Please add products first.");
+  return;
+ }
+
+ const btn=$("savePurchaseBtn");
+ setLoading(btn,true,"Saving Purchase...");
+
+ try{
+  const total=purchaseCart.reduce((a,x)=>a+x.lineTotal,0);
+
+  const header=await db.from("shop_purchases").insert({
+   shop_id:shopId,
+   supplier_name:$("purchaseSupplier").value.trim()||null,
+   invoice_number:$("purchaseInvoice").value.trim()||null,
+   total:total
+  }).select("id").single();
+
+  if(header.error)throw header.error;
+
+  const items=purchaseCart.map(x=>({
+   purchase_id:header.data.id,
+   product_id:x.id,
+   shop_id:shopId,
+   barcode:x.barcode||null,
+   quantity:x.quantity,
+   line_total:x.lineTotal,
+   unit_cost:x.unitCost
+  }));
+
+  const saved=await db.from("shop_purchase_items").insert(items);
+
+  if(saved.error){
+   throw new Error("Purchase entry saved, but items failed. Do not save again. "+saved.error.message);
+  }
+
+  const totals={};
+  purchaseCart.forEach(x=>{
+   if(!totals[x.id]){
+    totals[x.id]={quantity:0,cost:x.unitCost};
+   }
+   totals[x.id].quantity+=x.quantity;
+   totals[x.id].cost=x.unitCost;
+  });
+
+  for(const id of Object.keys(totals)){
+   const p=products.find(x=>String(x.id)===String(id));
+   if(!p)continue;
+
+   const upd=await db.from("shop_products")
+    .update({
+     stock:Number(p.stock||0)+totals[id].quantity,
+     cost:totals[id].cost
+    })
+    .eq("id",id).eq("shop_id",shopId);
+
+   if(upd.error){
+    throw new Error("Purchase saved, but stock update failed. Do not save again. "+upd.error.message);
+   }
+  }
+
+  purchaseCart=[];
+  renderPurchaseCart();
+  $("purchaseSupplier").value="";
+  $("purchaseInvoice").value="";
+  await loadProducts();
+
+  msg("purchaseMsg","Purchase saved and stock updated successfully!",true);
+
+ }catch(err){
+  msg("purchaseMsg",err.message);
+ }finally{
+  setLoading(btn,false,"Save Purchase");
+ }
+};
  function fillCustomerSelect(){
  $("customerOptions").innerHTML=customers.map(x=>
   '<option value="'+safe(x.name)+'"></option>'
