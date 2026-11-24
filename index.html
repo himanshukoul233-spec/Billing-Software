@@ -1098,17 +1098,18 @@ async function openSaleDetails(saleId){
  }
 }
 
-
 function fillProductSelect(){
- function fillPurchaseProductSelect(){
- $("purchaseProductOptions").innerHTML=products.map(x=>
-  '<option value="'+safe(x.name)+'"></option>'
- ).join("");
- }
  $("billProductOptions").innerHTML=products.map(x=>
   '<option value="'+safe(x.name)+'"></option>'
  ).join("");
 }
+
+function fillPurchaseProductSelect(){
+ $("purchaseProductOptions").innerHTML=products.map(x=>
+  '<option value="'+safe(x.name)+'"></option>'
+ ).join("");
+}
+
  function fillCustomerSelect(){
  $("customerOptions").innerHTML=customers.map(x=>
   '<option value="'+safe(x.name)+'"></option>'
