@@ -1990,6 +1990,7 @@ $("logoutBtn2").onclick=logout;
  const {data,error}=await db.auth.getSession();
  if(error){
   msg("loginMsg",error.message);
+  screen("loginView");
   return;
  }
 
@@ -2000,6 +2001,9 @@ $("logoutBtn2").onclick=logout;
    msg("loginMsg",err.message);
    screen("loginView");
   }
+ }
+ else{
+  screen("loginView");
  }
 })();
 let deferredInstallPrompt = null;
