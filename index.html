@@ -609,7 +609,7 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
 
 const $=id=>document.getElementById(id);
 let currentUser=null,profile=null,shop=null,shopId=null;
-let products=[],customers=[],sales=[],cart=[];
+let products=[],customers=[],sales=[],cart=[],purchaseCart=[];
 let recoveryMode=new URLSearchParams(location.hash.substring(1)).get("type")==="recovery";
 
 function msg(id,text,ok=false){
