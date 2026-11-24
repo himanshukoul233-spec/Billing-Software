@@ -1105,7 +1105,64 @@ function updateDashboard(){
  recent.map(x=>'<tr><td>'+safe(x.invoice_no)+'</td><td>'+dateText(x.created_at)+'</td><td>'+money(x.total)+'</td></tr>').join("")+
  '</table>':tableEmpty("No sales yet");
 }
+async function renderCustomerSalesReport(){
+  const period=$("salesReportPeriod").value;
+  const now=new Date();
 
+  let filtered=sales.filter(x=>{
+    const d=new Date(x.created_at);
+
+    if(period==="daily"){
+      return d.toDateString()===now.toDateString();
+    }
+    if(period==="monthly"){
+      return d.getMonth()===now.getMonth() &&
+             d.getFullYear()===now.getFullYear();
+    }
+    return d.getFullYear()===now.getFullYear();
+  });
+
+  if(!filtered.length){
+    $("salesCustomerReport").innerHTML=tableEmpty("इस अवधि में कोई बिक्री नहीं हुई");
+    return;
+  }
+
+  $("salesCustomerReport").innerHTML="रिपोर्ट लोड हो रही है...";
+
+  const ids=filtered.map(x=>x.id);
+  const result=await db.from("shop_sale_items")
+    .select("sale_id,product_name,quantity")
+    .eq("shop_id",shopId)
+    .in("sale_id",ids);
+
+  if(result.error){
+    $("salesCustomerReport").textContent=result.error.message;
+    return;
+  }
+
+  const items=result.data||[];
+  const total=filtered.reduce((sum,x)=>sum+Number(x.total||0),0);
+
+  $("salesCustomerReport").innerHTML=
+    '<p><b>कुल बिक्री: '+money(total)+'</b> | बिल: '+filtered.length+'</p>'+
+    '<table><tr><th>तारीख</th><th>ग्राहक</th><th>फोन</th><th>सामान</th><th>कुल</th></tr>'+
+    filtered.map(x=>{
+      const c=customers.find(y=>y.id===x.customer_id);
+      const bought=items.filter(y=>y.sale_id===x.id);
+      const itemNames=bought.map(y=>
+        safe(y.product_name)+" (Qty: "+Number(y.quantity)+")"
+      ).join("<br>");
+
+      return '<tr><td>'+dateText(x.created_at)+'</td>'+
+        '<td>'+safe(c?c.name:"Walk-in Customer")+'</td>'+
+        '<td>'+safe(c&&c.phone?c.phone:"-")+'</td>'+
+        '<td>'+(itemNames||"-")+'</td>'+
+        '<td>'+money(x.total)+'</td></tr>';
+    }).join("")+
+    '</table>';
+}
+
+$("salesReportPeriod").addEventListener("change",renderCustomerSalesReport);
 
 function renderProducts(){
   $("productList").innerHTML=products.length?
