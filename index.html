@@ -1233,6 +1233,7 @@ $("savePurchaseBtn").onclick=async()=>{
   $("purchaseSupplier").value="";
   $("purchaseInvoice").value="";
   await loadProducts();
+  await loadPurchaseHistory();
 
   msg("purchaseMsg","Purchase saved and stock updated successfully!",true);
 
