@@ -1864,6 +1864,7 @@ await loadCustomers();
   msg("billMsg","Bill saved successfully! Invoice: "+invoice+" | Total: "+savedTotal,true);
 
   await loadSales();
+  await loadCustomerDues();
   updateDashboard();
  }catch(err){
   msg("billMsg",err.message);
