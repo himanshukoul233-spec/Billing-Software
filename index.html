@@ -1679,6 +1679,23 @@ document.getElementById("billScanBtn").addEventListener("click", () => {
     document.getElementById("addCartBtn").click();
   });
 });
+ // PURCHASE BARCODE SCAN
+document.getElementById("purchaseScanBtn").addEventListener("click", () => {
+  startVyaparScan((barcode) => {
+    const product = products.find(
+      p => String(p.barcode || "").trim() === String(barcode).trim()
+    );
+
+    if (!product) {
+      alert("Product Products section mein save nahi hai.");
+      return;
+    }
+
+    document.getElementById("purchaseProduct").value = product.name;
+    document.getElementById("purchaseBarcode").value = product.barcode || "";
+    document.getElementById("purchaseCost").value = product.cost || 0;
+  });
+});
 </script>
 
 
