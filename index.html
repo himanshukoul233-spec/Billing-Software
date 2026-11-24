@@ -1447,56 +1447,57 @@ async function recordDuePayment(id){
   alert("पेमेंट दर्ज हो गई");
 }
 
+
 async function sendDueReminder(id){
   const r = await db.from("shop_customer_dues")
-    .select("*").eq("id",id).eq("shop_id",shopId).single();
+    .select("*")
+    .eq("id",id)
+    .eq("shop_id",shopId)
+    .single();
 
   if(r.error) return alert(r.error.message);
 
   const x = r.data;
-  const phone = String(x.customer_phone||"").replace(/\D/g,"");
+  const customerPhone = String(x.customer_phone||"").replace(/\D/g,"");
 
-  if(!phone) return alert("इस ग्राहक का मोबाइल नंबर नहीं है");
+  if(!customerPhone){
+    return alert("ग्राहक का मोबाइल नंबर उपलब्ध नहीं है");
+  }
 
-  const message = "नमस्ते "+x.customer_name+
-    ", आपके खाते में "+money(x.balance)+
-    " बाकी हैं। कृपया पेमेंट कर दें। धन्यवाद।";
+  const shopName = shop?.name || "हमारी दुकान";
+  const shopPhone = profile?.phone || "नंबर उपलब्ध नहीं";
 
-  window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(message),"_blank");
+  const message =
+`🙏 *नमस्कार ${x.customer_name} जी!*
+
+आपको *${shopName}* की तरफ से नमस्कार।
+
+📋 *आपके खाते का बकाया विवरण*
+
+👤 ग्राहक का नाम: ${x.customer_name}
+
+💰 कुल उधार: ${money(x.total_amount)}
+✅ जमा पेमेंट: ${money(x.paid_amount)}
+
+🔴 *बाकी पेमेंट: ${money(x.balance)}*
+
+आपसे विनम्र निवेदन है कि कृपया सुविधानुसार अपना बकाया भुगतान कर दें।
+
+आपके सहयोग के लिए धन्यवाद! 🙏
+
+━━━━━━━━━━━━━━━━
+🏪 *${shopName}*
+📞 दुकान संपर्क नंबर: ${shopPhone}
+━━━━━━━━━━━━━━━━
+
+_यह संदेश आपके खाते के रिकॉर्ड के अनुसार भेजा गया है।_`;
+
+  window.open(
+    "https://wa.me/"+customerPhone+"?text="+encodeURIComponent(message),
+    "_blank"
+  );
 }
 
-$("dueForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-
-  const f = new FormData(e.target);
-  const data = {
-    shop_id:shopId,
-    customer_name:String(f.get("customer_name")||"").trim(),
-    customer_phone:String(f.get("customer_phone")||"").trim()||null,
-    total_amount:Number(f.get("total_amount")),
-    paid_amount:0
-  };
-
-  if(!data.customer_name || !data.total_amount || data.total_amount<=0){
-    return msg("dueMsg","सही जानकारी भरें");
-  }
-
-  const btn = e.target.querySelector("button[type=submit]");
-  setLoading(btn,true,"उधार सेव करें");
-
-  try{
-    const r = await db.from("shop_customer_dues").insert(data);
-    if(r.error) throw r.error;
-
-    e.target.reset();
-    msg("dueMsg","उधार सेव हो गया!",true);
-    await loadCustomerDues();
-  }catch(err){
-    msg("dueMsg",err.message);
-  }finally{
-    setLoading(btn,false,"उधार सेव करें");
-  }
-});
 
 function navigate(page){
  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
