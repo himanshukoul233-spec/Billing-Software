@@ -447,6 +447,15 @@ td, th {
 <button class="full" id="addCartBtn">Add to Bill</button>
 <div id="cartList" style="margin-top:15px"></div>
 <h3 style="margin-top:18px">Total: <span id="billTotal">₹0.00</span></h3>
+ <label>Payment Status</label>
+<select id="paymentStatus">
+  <option value="Paid">Paid - पूरा भुगतान</option>
+  <option value="Partial">Partial - कुछ भुगतान</option>
+  <option value="Udhar">Udhar - पूरा उधार</option>
+</select>
+
+<label>Received Amount (₹)</label>
+<input type="number" id="receivedAmount" min="0" step="0.01" value="0" placeholder="मिला हुआ पैसा">
 <button class="full" id="saveBillBtn">Save Bill</button>
 <p id="billMsg" class="msg"></p>
 </div>
