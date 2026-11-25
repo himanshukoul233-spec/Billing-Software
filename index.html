@@ -1188,7 +1188,7 @@ async function loadProducts(){
 
 async function loadCustomers(){
  const r=await db.from("shop_customers")
- .select("id,shop_id,name,email,phone,created_at")
+ .select("id,shop_id,name,email,phone,address,created_at")
  .eq("shop_id",shopId).order("created_at",{ascending:false});
 
  if(r.error)throw new Error("Customers: "+r.error.message);
