@@ -2015,7 +2015,7 @@ $("addCartBtn").onclick=()=>{
   return;
  }
 
- const gst=Number(p.gst_percent||0);
+ const gst=shop.gst_enabled===true?Number(p.gst_percent||0):0;
  const base=qty*price;
  const lineTotal=base+(base*gst/100);
 
