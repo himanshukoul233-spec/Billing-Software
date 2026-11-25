@@ -1158,7 +1158,7 @@ async function renderCustomerSalesReport(){
 
   const ids=filtered.map(x=>x.id);
   const result=await db.from("shop_sale_items")
-    .select("sale_id,product_name,quantity")
+    .select("sale_id,product_name,quantity,unit")
     .eq("shop_id",shopId)
     .in("sale_id",ids);
 
@@ -1177,8 +1177,8 @@ async function renderCustomerSalesReport(){
       const c=customers.find(y=>y.id===x.customer_id);
       const bought=items.filter(y=>y.sale_id===x.id);
       const itemNames=bought.map(y=>
-        safe(y.product_name)+" (Qty: "+Number(y.quantity)+")"
-      ).join("<br>");
+  safe(y.product_name)+" (Qty: "+Number(y.quantity)+" "+safe(y.unit||"Piece")+")"
+).join("<br>");
 
       return '<tr><td>'+dateText(x.created_at)+'</td>'+
         '<td>'+safe(c?c.name:"Walk-in Customer")+'</td>'+
