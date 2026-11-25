@@ -450,8 +450,29 @@ td, th {
   <button type="button" id="billScanBtn">📷 Scan</button>
 </div>
 <div class="row">
-<div><label>Quantity</label><input type="number" id="billQty" min="1" value="1"></div>
-<div><label>Unit Price (₹)</label><input type="number" id="billPrice" min="0" step="0.01"></div>
+  <div>
+    <label>Quantity</label>
+    <input type="number" id="billQty" min="0.01" step="0.01" value="1"
+      onclick="document.getElementById('billUnitBox').classList.remove('hidden')"
+      onfocus="document.getElementById('billUnitBox').classList.remove('hidden')">
+
+    <div id="billUnitBox" class="hidden">
+      <label>Unit चुनें</label>
+      <select id="billUnit">
+        <option value="KG">KG</option>
+        <option value="Gram">Gram</option>
+        <option value="Litre">Litre</option>
+        <option value="Piece">Piece</option>
+        <option value="Packet">Packet</option>
+        <option value="Dozen">Dozen</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <label>Unit Price (₹)</label>
+    <input type="number" id="billPrice" min="0" step="0.01">
+  </div>
 </div>
 <button class="full" id="addCartBtn">Add to Bill</button>
 <div id="cartList" style="margin-top:15px"></div>
@@ -1386,10 +1407,17 @@ $("billCustomerName").addEventListener("change",()=>{
 function renderCart(){
  $("cartList").innerHTML=cart.length?
  '<div class="tablewrap"><table><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr>'+
- cart.map((x,i)=>'<tr><td>'+safe(x.name)+'</td><td>'+x.quantity+'</td><td>'+money(x.price)+'</td><td>'+money(x.lineTotal)+'</td><td><button class="danger removeCart" data-index="'+i+'">X</button></td></tr>').join("")+
+ cart.map((x,i)=>
+ '<tr><td>'+safe(x.name)+'</td>'+
+ '<td>'+x.quantity+' '+safe(x.unit||"Piece")+'</td>'+
+ '<td>'+money(x.price)+'</td>'+
+ '<td>'+money(x.lineTotal)+'</td>'+
+ '<td><button type="button" class="danger removeCart" data-index="'+i+'">X</button></td></tr>'
+ ).join("")+
  '</table></div>':tableEmpty("No products in bill");
 
  $("billTotal").textContent=money(cart.reduce((a,x)=>a+x.lineTotal,0));
+
  document.querySelectorAll(".removeCart").forEach(b=>{
   b.addEventListener("click",()=>{
    cart.splice(Number(b.dataset.index),1);
@@ -1827,10 +1855,13 @@ $("addCartBtn").onclick=()=>{
  const base=qty*price;
  const lineTotal=base+(base*gst/100);
 
+  const unit=$("billUnit").value;
+
  cart.push({
   id:p.id,
   name:p.name,
   quantity:qty,
+  unit:unit,
   price:price,
   gst:gst,
   lineTotal:lineTotal
@@ -1839,6 +1870,7 @@ $("addCartBtn").onclick=()=>{
  $("billQty").value=1;
  $("billProduct").value="";
  $("billPrice").value="";
+ $("billUnitBox").classList.add("hidden");
 
  renderCart();
  msg("billMsg","Product added to bill successfully!",true);
