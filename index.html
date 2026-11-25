@@ -1229,7 +1229,7 @@ async function openSaleDetails(saleId){
  $("saleDetailCard").classList.remove("hidden");
  try{
   const result=await db.from("shop_sale_items")
-   .select("product_name,quantity,unit_price,gst_percent,line_total")
+   .select("product_name,quantity,unit,unit_price,gst_percent,line_total")
    .eq("sale_id",saleId).eq("shop_id",shopId);
   if(result.error)throw result.error;
   const customer=customers.find(c=>c.id===sale.customer_id);
@@ -1942,15 +1942,16 @@ if(customerName){
   if(sale.error)throw sale.error;
 
   const items=cart.map(x=>({
-   sale_id:sale.data.id,
-   shop_id:shopId,
-   product_id:x.id,
-   product_name:x.name,
-   quantity:x.quantity,
-   unit_price:x.price,
-   gst_percent:x.gst,
-   line_total:x.lineTotal
-  }));
+ sale_id:sale.data.id,
+ shop_id:shopId,
+ product_id:x.id,
+ product_name:x.name,
+ quantity:x.quantity,
+ unit:x.unit||"Piece",
+ unit_price:x.price,
+ gst_percent:x.gst,
+ line_total:x.lineTotal
+}));
 
   const itemResult=await db.from("shop_sale_items").insert(items);
   if(itemResult.error){
