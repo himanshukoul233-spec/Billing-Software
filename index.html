@@ -852,7 +852,7 @@ async function loadProfile(user){
   return;
  }
  const p=await db.from("shop_profiles")
- .select("id,owner_name,email,phone,username,status,subscription_plan,subscription_expires_at")
+ .select("id,owner_name,email,phone,address,username,status,subscription_plan,subscription_expires_at")
  .eq("id",user.id).maybeSingle();
 
  if(p.error)throw new Error("Profile database error: "+p.error.message);
