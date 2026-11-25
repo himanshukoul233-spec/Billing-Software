@@ -883,7 +883,7 @@ async function loadProfile(user){
  profile=p.data;
 
  const s=await db.from("shops")
- .select("id,name,owner_id,status,trial_ends_at,created_at,owner_name,username")
+ .select("id,name,owner_id,status,trial_ends_at,created_at,owner_name,username,gst_enabled")
  .eq("owner_id",user.id).maybeSingle();
 
  if(s.error)throw new Error("Shop database error: "+s.error.message);
@@ -891,6 +891,30 @@ async function loadProfile(user){
 
  shop=s.data;
  shopId=shop.id;
+ $("gstEnabledToggle").checked=shop.gst_enabled===true;
+
+$("gstEnabledToggle").onchange=async function(){
+  const toggle=this;
+  const enabled=toggle.checked;
+  toggle.disabled=true;
+  msg("gstSettingMsg","Saving...");
+
+  try{
+    const result=await db.from("shops")
+      .update({gst_enabled:enabled})
+      .eq("id",shopId);
+
+    if(result.error)throw result.error;
+
+    shop.gst_enabled=enabled;
+    msg("gstSettingMsg",enabled?"GST चालू हो गया।":"GST बंद हो गया।",true);
+  }catch(err){
+    toggle.checked=!enabled;
+    msg("gstSettingMsg","Error: "+err.message);
+  }finally{
+    toggle.disabled=false;
+  }
+};
  
 let activeSubscriptionPlan = null;
 let activeSubscriptionExpiry = null;
