@@ -1350,7 +1350,7 @@ async function openSaleDetails(saleId){
       '<div class="invoice-shop-name">🛍 '+safe(shop?.name||"दुकान")+'</div>'+
 '<div style="text-align:center;font-size:13px;margin:5px 0 12px">'+
 safe(shop?.address||"")+'<br>'+
-'Phone: '+safe(shop?.phone||"")+
+'Phone: '+safe(shop?.phone.number||"")+
 '</div>'+
    '<div class="status" style="background:#eff6ff;color:#172554"><b>Invoice:</b> '+safe(sale.invoice_no)+'<br><b>Date:</b> '+dateText(sale.created_at)+'<br><b>Customer:</b> '+safe(customer?customer.name:"Walk-in Customer")+(customer&&customer.email?'<br><b>Email:</b> '+safe(customer.email):'')+'</div>'+
    '<h3 style="margin-top:16px">Items Purchased</h3>'+
