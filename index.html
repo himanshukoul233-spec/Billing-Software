@@ -1798,13 +1798,30 @@ $("billProduct").addEventListener("input",()=>{
  $("billPrice").value=p?Number(p.price):"";
 });
 
+
 // ADD TO CART
 $("addCartBtn").onclick=()=>{
- const p=products.find(x=>x.name.trim().toLowerCase()===$("billProduct").value.trim().toLowerCase());
+ const p=products.find(x=>
+  x.name.trim().toLowerCase()===$("billProduct").value.trim().toLowerCase()
+ );
 
- if(!p){msg("billMsg","Please select a product.");return;}
- if(!Number.isFinite(qty)||qty<=0){msg("billMsg","Enter a valid quantity.");return;}
- if(!Number.isFinite(price)||price<0){msg("billMsg","Enter a valid price.");return;}
+ const qty=Number($("billQty").value);
+ const price=Number($("billPrice").value);
+
+ if(!p){
+  msg("billMsg","Please select a product.");
+  return;
+ }
+
+ if(!Number.isFinite(qty)||qty<=0){
+  msg("billMsg","Enter a valid quantity.");
+  return;
+ }
+
+ if(!Number.isFinite(price)||price<0){
+  msg("billMsg","Enter a valid price.");
+  return;
+ }
 
  const gst=Number(p.gst_percent||0);
  const base=qty*price;
@@ -1820,8 +1837,11 @@ $("addCartBtn").onclick=()=>{
  });
 
  $("billQty").value=1;
+ $("billProduct").value="";
+ $("billPrice").value="";
+
  renderCart();
- msg("billMsg","");
+ msg("billMsg","Product added to bill successfully!",true);
 };
 
 // SAVE BILL
