@@ -2031,7 +2031,7 @@ if(paymentStatus==="Paid"){
 }
   const customerName=$("billCustomerName").value.trim();
 const customerPhone=$("billCustomerPhone").value.trim();
-  $("billCustomerAddress").value=existing?.address||"";
+  const customerAddress=$("billCustomerAddress").value.trim();
   if(total-receivedAmount>0 && !customerName){
   throw new Error("उधार या Partial पेमेंट के लिए ग्राहक का नाम भरना जरूरी है।");
   }
@@ -2045,17 +2045,22 @@ if(customerName){
 
  if(existing){
   customerId=existing.id;
-  if(customerPhone && customerPhone!==(existing.phone||"")){
-   const upd=await db.from("shop_customers")
-    .update({phone:customerPhone})
-    .eq("id",existing.id).eq("shop_id",shopId);
-   if(upd.error)throw upd.error;
-  }
+
+  const upd=await db.from("shop_customers")
+   .update({
+    phone:customerPhone||null,
+    address:customerAddress||null
+   })
+   .eq("id",existing.id).eq("shop_id",shopId);
+
+  if(upd.error)throw upd.error;
+
  }else{
   const created=await db.from("shop_customers").insert({
    shop_id:shopId,
    name:customerName,
-   phone:customerPhone||null
+   phone:customerPhone||null,
+   address:customerAddress||null
   }).select("id").single();
 
   if(created.error)throw created.error;
