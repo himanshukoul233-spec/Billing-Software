@@ -1239,7 +1239,7 @@ async function openSaleDetails(saleId){
    '<h3 style="margin-top:16px">Items Purchased</h3>'+
    (rows.length?
     '<div class="tablewrap"><table><tr><th>Product</th><th>Qty</th><th>Price</th><th>GST</th><th>Total</th></tr>'+
-    rows.map(i=>'<tr><td>'+safe(i.product_name)+'</td><td>'+Number(i.quantity||0)+'</td><td>'+money(i.unit_price)+'</td><td>'+Number(i.gst_percent||0)+'%</td><td>'+money(i.line_total)+'</td></tr>').join("")+
+    rows.map(i=>'<tr><td>'+safe(i.product_name)+'</td><td>'+Number(i.quantity||0)+' '+safe(i.unit||"Piece")+'</td><td>'+money(i.unit_price)+'</td><td>'+Number(i.gst_percent||0)+'%</td><td>'+money(i.line_total)+'</td></tr>').join("")+
     '</table></div>':
     tableEmpty("No item details found for this bill"))+
    '<h3 style="text-align:right;margin-top:16px">Bill Total: '+money(sale.total)+'</h3>';
