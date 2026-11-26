@@ -1246,8 +1246,7 @@ async function loadProducts(){
 
 async function loadCustomers(){
  const r=await db.from("shop_customers")
- .select("id,shop_id,name,email,phone,address,created_at")
- .eq("shop_id",shopId).order("created_at",{ascending:false});
+ .select("id,shop_id,customer_id,invoice_no,total,received_amount,due_amount,payment_mode,created_at")
 
  if(r.error)throw new Error("Customers: "+r.error.message);
  customers=r.data||[];
