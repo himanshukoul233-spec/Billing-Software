@@ -858,6 +858,7 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
 
 const $=id=>document.getElementById(id);
 let currentUser=null,profile=null,shop=null,shopId=null;
+ let subscriptionLocked = false;
 let products=[],customers=[],sales=[],cart=[],purchaseCart=[];
 let recoveryMode=new URLSearchParams(location.hash.substring(1)).get("type")==="recovery";
 
@@ -998,9 +999,44 @@ $("settingStatus").textContent =
 
 
  screen("shopView");
-await loadAllData();
+
 await loadVyaparSubscription();
+
+const expiryDate =
+  activeSubscriptionExpiry ||
+  profile.subscription_expires_at ||
+  shop.trial_ends_at;
+
+subscriptionLocked = expiryDate
+  ? new Date(expiryDate).getTime() <= Date.now()
+  : false;
+
+if (subscriptionLocked) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.add("hidden");
+  });
+
+  $("subscriptionPage").classList.remove("hidden");
+
+  document.querySelectorAll(".nav button").forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.page === "subscriptionPage"
+    );
+  });
+
+  $("subscriptionPage").insertAdjacentHTML(
+    "afterbegin",
+    '<div class="card" style="border:2px solid #dc2626">' +
+    '<h2 style="color:#dc2626">⚠️ Subscription Expired</h2>' +
+    '<p>आपका प्लान समाप्त हो गया है। Billing और Dashboard इस्तेमाल करने के लिए नया प्लान खरीदें।</p>' +
+    '</div>'
+  );
+
+  return;
 }
+
+await loadAllData();
 
 async function loadVyaparSubscription(){
   const plansBox = $("subscriptionPlans");
@@ -1962,6 +1998,10 @@ _यह संदेश आपके खाते के रिकॉर्ड �
 
 
 function navigate(page){
+  if(subscriptionLocked && page !== "subscriptionPage"){
+  alert("आपका प्लान समाप्त हो गया है। कृपया नया प्लान लें।");
+  page = "subscriptionPage";
+  }
  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
  $(page).classList.remove("hidden");
  document.querySelectorAll(".nav button").forEach(b=>{
