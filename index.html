@@ -751,6 +751,14 @@ td, th {
 <h2 style="margin-top:14px">Bill Details</h2>
  <button class="full" type="button" onclick="window.print()">🖨️ Print / Download Bill PDF</button>
 <div id="saleDetailContent"></div>
+ <div id="billShareActions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+  <button type="button" class="full" onclick="downloadBillPDF()">
+    📄 Download PDF
+  </button>
+  <button type="button" class="full" onclick="shareBillWhatsApp()">
+    🟢 Send on WhatsApp
+  </button>
+ </div>
 </div>
 </div>
 
@@ -1395,38 +1403,86 @@ function renderSales(){
  '</table>':tableEmpty("No sales found");
 }
 
+
 async function openSaleDetails(saleId){
  const sale=sales.find(x=>x.id===saleId);
  if(!sale)return;
+
  const content=$("saleDetailContent");
- content.innerHTML='<p class="muted">Loading bill details...</p>';
+ content.innerHTML='<p>Loading bill details...</p>';
+
  $("salesHistoryCard").classList.add("hidden");
  $("saleDetailCard").classList.remove("hidden");
+
  try{
   const result=await db.from("shop_sale_items")
    .select("product_name,quantity,unit,unit_price,gst_percent,line_total")
-   .eq("sale_id",saleId).eq("shop_id",shopId);
+   .eq("sale_id",saleId)
+   .eq("shop_id",shopId);
+
   if(result.error)throw result.error;
+
   const customer=customers.find(c=>c.id===sale.customer_id);
   const rows=result.data||[];
+
+  let taxable=0;
+  let totalGST=0;
+
+  rows.forEach(i=>{
+   const base=Number(i.quantity||0)*Number(i.unit_price||0);
+   const gst=base*Number(i.gst_percent||0)/100;
+   taxable+=base;
+   totalGST+=gst;
+  });
+
+  const grandTotal=taxable+totalGST;
+
   content.innerHTML=
-      '<div class="invoice-shop-name">🛍 '+safe(shop?.name||"दुकान")+'</div>'+
-'<div style="text-align:center;font-size:13px;margin:5px 0 12px">'+
-safe(shop?.address||"")+'<br>'+
-'Phone: '+safe(profile?.phone||"")+
-'</div>'+
-   '<div class="status" style="background:#eff6ff;color:#172554"><b>Invoice:</b> '+safe(sale.invoice_no)+'<br><b>Date:</b> '+dateText(sale.created_at)+'<br><b>Customer:</b> '+safe(customer?customer.name:"Walk-in Customer")+(customer&&customer.email?'<br><b>Email:</b> '+safe(customer.email):'')+'</div>'+
+   '<div class="invoice-shop-name">🛍 '+safe(shop?.name||"दुकान")+'</div>'+
+   '<div style="text-align:center;font-size:13px;margin:5px 0 12px">'+
+   safe(profile?.address||"")+'<br>'+
+   'Phone: '+safe(profile?.phone||"")+
+   '</div>'+
+
+   '<div class="status">'+
+   '<b>Invoice:</b> '+safe(sale.invoice_no)+'<br>'+
+   '<b>Date:</b> '+dateText(sale.created_at)+'<br>'+
+   '<b>Customer:</b> '+safe(customer?.name||"Walk-in Customer")+'<br>'+
+   '<b>Phone:</b> '+safe(customer?.phone||"-")+
+   '</div>'+
+
    '<h3 style="margin-top:16px">Items Purchased</h3>'+
-   (rows.length?
-    '<div class="tablewrap"><table><tr><th>Product</th><th>Qty</th><th>Price</th><th>GST</th><th>Total</th></tr>'+
-    rows.map(i=>'<tr><td>'+safe(i.product_name)+'</td><td>'+Number(i.quantity||0)+' '+safe(i.unit||"Piece")+'</td><td>'+money(i.unit_price)+'</td><td>'+Number(i.gst_percent||0)+'%</td><td>'+money(i.line_total)+'</td></tr>').join("")+
-    '</table></div>':
-    tableEmpty("No item details found for this bill"))+
-   '<h3 style="text-align:right;margin-top:16px">Bill Total: '+money(sale.total)+'</h3>';
+
+   '<div class="tablewrap"><table>'+
+   '<tr><th>Product</th><th>Qty</th><th>Price</th><th>GST %</th><th>GST ₹</th><th>Total</th></tr>'+
+
+   rows.map(i=>{
+    const base=Number(i.quantity||0)*Number(i.unit_price||0);
+    const gst=base*Number(i.gst_percent||0)/100;
+
+    return '<tr>'+
+     '<td>'+safe(i.product_name)+'</td>'+
+     '<td>'+Number(i.quantity)+' '+safe(i.unit||"Piece")+'</td>'+
+     '<td>'+money(i.unit_price)+'</td>'+
+     '<td>'+Number(i.gst_percent||0)+'%</td>'+
+     '<td>'+money(gst)+'</td>'+
+     '<td>'+money(i.line_total)+'</td>'+
+     '</tr>';
+   }).join("")+
+
+   '</table></div>'+
+
+   '<div style="margin-top:18px;text-align:right;line-height:2">'+
+   '<div>Taxable Amount: <b>'+money(taxable)+'</b></div>'+
+   '<div>GST Amount: <b>'+money(totalGST)+'</b></div>'+
+   '<h3>Grand Total: '+money(grandTotal)+'</h3>'+
+   '</div>';
+
  }catch(err){
-  content.innerHTML='<p class="msg">Could not load bill details: '+safe(err.message||err)+'</p>';
+  content.innerHTML='<p class="msg">Error: '+safe(err.message||err)+'</p>';
  }
 }
+
 
 function fillProductSelect(){
  $("billProductOptions").innerHTML=products.map(x=>
