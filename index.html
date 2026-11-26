@@ -1937,7 +1937,10 @@ $("resetForm").addEventListener("submit",async e=>{
   setLoading(btn,false,"Update Password");
  }
 });
-
+// OPENING STOCK AUTO UPDATE
+$("productOpeningStock").addEventListener("input", function(){
+  $("productCurrentQuantity").value = this.value || 0;
+});
 // ADD PRODUCT
 $("productForm").addEventListener("submit",async e=>{
  e.preventDefault();
@@ -1954,7 +1957,7 @@ $("productForm").addEventListener("submit",async e=>{
    price:Number(f.get("price")),
    cost:Number(f.get("cost")||0),
    gst_percent:Number(f.get("gst_percent")||0),
-stock:Number(f.get("stock")||0)
+stock:Number(f.get("opening_stock")||0)
   });
   if(error)throw error;
   e.target.reset();
