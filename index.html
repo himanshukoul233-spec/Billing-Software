@@ -1508,25 +1508,41 @@ async function loadHtml2Pdf(){
 }
 
 async function createBillPDF(){
- await loadHtml2Pdf();
+  await loadHtml2Pdf();
 
- const element=$("saleDetailContent");
- const sale=sales.find(x=>x.id===currentSaleId);
+  const element = $("saleDetailContent");
+  const sale = sales.find(x => x.id === currentSaleId);
 
- const invoice=sale?.invoice_no||"Bill";
- const filename=("Vyapar-Book-"+invoice).replace(/[^a-zA-Z0-9_-]/g,"_")+".pdf";
+  const invoice = sale?.invoice_no || "Bill";
+  const filename = ("Vyapar-Book-" + invoice)
+    .replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf";
 
- const worker=window.html2pdf()
-  .set({
-   margin:8,
-   filename:filename,
-   image:{type:"jpeg",quality:0.98},
-   html2canvas:{scale:2,useCORS:true},
-   jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
-  })
-  .from(element);
+  const worker = window.html2pdf()
+    .set({
+      margin: 8,
+      filename: filename,
+      image: {
+        type: "jpeg",
+        quality: 0.98
+      },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0,
+        windowHeight: element.scrollHeight
+      },
+      pagebreak: {
+        mode: ["css", "legacy"]
+      },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait"
+      }
+    })
+    .from(element);
 
- return {worker,filename};
+  return {worker, filename};
 }
 
 async function downloadBillPDF(){
