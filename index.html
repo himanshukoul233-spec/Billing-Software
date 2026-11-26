@@ -691,8 +691,18 @@ td, th {
 </div>
 <label>GST Percentage (%)</label>
 <input name="gst_percent" type="number" min="0" max="100" step="0.01" value="0" placeholder="जैसे 5, 12, 18">
-<label>Opening Stock *</label>
-<input name="stock" type="number" min="0" step="1" value="0" required>
+<div class="row">
+ <div>
+  <label>Opening Stock *</label>
+  <input name="opening_stock" id="productOpeningStock"
+   type="number" min="0" step="0.01" value="0" required>
+ </div>
+ <div>
+  <label>Current Quantity</label>
+  <input id="productCurrentQuantity" type="number" value="0" readonly>
+ </div>
+</div>
+<p class="muted">Current Quantity शुरुआत में Opening Stock के बराबर होगी। Bill और Purchase के बाद अपने आप बदलेगी।</p>
 <button class="full" id="addProductBtn">Save Product</button>
 </form>
 <p id="productMsg" class="msg"></p>
