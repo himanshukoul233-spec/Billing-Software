@@ -1998,10 +1998,6 @@ _यह संदेश आपके खाते के रिकॉर्ड �
 
 
 function navigate(page){
-  if(subscriptionLocked && page !== "subscriptionPage"){
-  alert("आपका प्लान समाप्त हो गया है। कृपया नया प्लान लें।");
-  page = "subscriptionPage";
-  }
  document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));
  $(page).classList.remove("hidden");
  document.querySelectorAll(".nav button").forEach(b=>{
