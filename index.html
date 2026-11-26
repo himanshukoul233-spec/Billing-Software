@@ -2101,6 +2101,28 @@ if(customerName){
   customerId=created.data.id;
  }
 }
+  // CHECK AVAILABLE STOCK
+const stockCheck = new Map();
+
+cart.forEach(x => {
+  const oldQty = stockCheck.get(x.id) || 0;
+  stockCheck.set(x.id, oldQty + Number(x.quantity || 0));
+});
+
+for (const [productId, qty] of stockCheck) {
+  const product = products.find(p => p.id === productId);
+
+  if (!product) {
+    throw new Error("Product nahi mila: " + productId);
+  }
+
+  if (qty > Number(product.stock || 0)) {
+    throw new Error(
+      product.name + " ka stock kam hai. Available: " +
+      product.stock + ", Bill quantity: " + qty
+    );
+  }
+}
   const invoice="VB-"+Date.now();
 
   const sale=await db.from("shop_sales").insert({
@@ -2128,6 +2150,26 @@ if(customerName){
   if(itemResult.error){
    throw new Error("Bill header saved, but bill items failed: "+itemResult.error.message+". Please do not create the same bill again until checked.");
   }
+  // REDUCE PRODUCT STOCK AFTER BILL
+for (const [productId, qty] of stockCheck) {
+  const product = products.find(p => p.id === productId);
+
+  const newStock = Number(product.stock || 0) - qty;
+
+  const stockUpdate = await db.from("shop_products")
+    .update({ stock: newStock })
+    .eq("id", productId)
+    .eq("shop_id", shopId);
+
+  if (stockUpdate.error) {
+    throw new Error(
+      "Bill save ho gaya, lekin " + product.name +
+      " ka stock update nahi hua: " + stockUpdate.error.message
+    );
+  }
+
+  product.stock = newStock;
+}
   const balanceAmount=total-receivedAmount;
 
 if(balanceAmount>0){
@@ -2324,25 +2366,65 @@ document.getElementById("productScanBtn").addEventListener("click", () => {
   });
 });
 
+
+
 // BILLING BARCODE SCAN
 document.getElementById("billScanBtn").addEventListener("click", () => {
   startVyaparScan((barcode) => {
+
     const product = products.find(
       p => String(p.barcode || "").trim() === String(barcode).trim()
     );
 
     if (!product) {
-      alert("Yeh barcode wala product abhi Products mein save nahi hai.");
+      alert("Yeh barcode wala product Products mein save nahi hai.");
       return;
     }
 
-    document.getElementById("billProduct").value = product.name
-    document.getElementById("billPrice").value = product.price;
-    document.getElementById("billQty").value = 1;
+    const existing = cart.find(x => x.id === product.id);
 
-    document.getElementById("addCartBtn").click();
+    if (existing) {
+      if (existing.quantity + 1 > Number(product.stock || 0)) {
+        alert("Stock available nahi hai!");
+        return;
+      }
+
+      existing.quantity += 1;
+      existing.lineTotal =
+        existing.quantity * existing.price *
+        (1 + existing.gst / 100);
+
+      renderCart();
+      msg("billMsg", "Quantity badh gayi!", true);
+      return;
+    }
+
+    if (Number(product.stock || 0) < 1) {
+      alert("Product out of stock hai!");
+      return;
+    }
+
+    const gst = shop.gst_enabled === true
+      ? Number(product.gst_percent || 0)
+      : 0;
+
+    const price = Number(product.price);
+
+    cart.push({
+      id: product.id,
+      name: product.name,
+      quantity: 1,
+      unit: "Piece",
+      price: price,
+      gst: gst,
+      lineTotal: price * (1 + gst / 100)
+    });
+
+    renderCart();
+    msg("Product bill mein add ho gaya!", true);
   });
 });
+
  // PURCHASE BARCODE SCAN
 document.getElementById("purchaseScanBtn").addEventListener("click", () => {
   startVyaparScan((barcode) => {
