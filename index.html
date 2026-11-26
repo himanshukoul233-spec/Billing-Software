@@ -1245,9 +1245,8 @@ async function loadProducts(){
 }
 
 async function loadCustomers(){
- const r=await db.from("shop_customers")
- .select("id,shop_id,customer_id,invoice_no,total,received_amount,due_amount,payment_mode,created_at")
-
+ .select("id,shop_id,name,phone,email,address,created_at")
+ 
  if(r.error)throw new Error("Customers: "+r.error.message);
  customers=r.data||[];
  renderCustomers();
@@ -1257,7 +1256,7 @@ async function loadCustomers(){
 
 async function loadSales(){
  const r=await db.from("shop_sales")
- .select("id,shop_id,customer_id,invoice_no,total,created_at")
+.select("id,shop_id,customer_id,invoice_no,total,received_amount,due_amount,payment_mode,created_at")
  .eq("shop_id",shopId).order("created_at",{ascending:false});
 
  if(r.error)throw new Error("Sales: "+r.error.message);
