@@ -1451,12 +1451,13 @@ const paymentMode=sale.payment_mode==="Online"
    'Phone: '+safe(profile?.phone||"")+
    '</div>'+
 
-   '<div class="status">'+
+   '<div class="invoice-meta">'+
    '<b>Invoice:</b> '+safe(sale.invoice_no)+'<br>'+
    '<b>Date:</b> '+dateText(sale.created_at)+'<br>'+
    '<b>Customer Name:</b> '+safe(customer?.name||"Walk-in Customer")+'<br>'+
 '<b>Phone Number:</b> '+safe(customer?.phone||"-")+'<br>'+
 '<b>Address:</b> '+safe(customer?.address||"-")+
+   '</div>'+
 
    '<h3 style="margin-top:16px">Items Purchased</h3>'+
 
