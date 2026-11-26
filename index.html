@@ -1454,9 +1454,9 @@ const paymentMode=sale.payment_mode==="Online"
    '<div class="status">'+
    '<b>Invoice:</b> '+safe(sale.invoice_no)+'<br>'+
    '<b>Date:</b> '+dateText(sale.created_at)+'<br>'+
-   '<b>Customer:</b> '+safe(customer?.name||"Walk-in Customer")+'<br>'+
-   '<b>Phone:</b> '+safe(customer?.phone||"-")+
-   '</div>'+
+   '<b>Customer Name:</b> '+safe(customer?.name||"Walk-in Customer")+'<br>'+
+'<b>Phone Number:</b> '+safe(customer?.phone||"-")+'<br>'+
+'<b>Address:</b> '+safe(customer?.address||"-")+
 
    '<h3 style="margin-top:16px">Items Purchased</h3>'+
 
@@ -2384,6 +2384,7 @@ if(balanceAmount>0){
   renderCart();
   $("billCustomerName").value="";
 $("billCustomerPhone").value="";
+  $("billCustomerAddress").value="";
 await loadCustomers();
   
   msg("billMsg","Bill saved successfully! Invoice: "+invoice+" | Total: "+savedTotal,true);
