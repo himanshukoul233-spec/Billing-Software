@@ -1437,6 +1437,13 @@ async function openSaleDetails(saleId){
   });
 
   const grandTotal=taxable+totalGST;
+  const receivedAmount=Number(sale.received_amount||0);
+const dueAmount=Number(
+ sale.due_amount ?? Math.max(0,grandTotal-receivedAmount)
+);
+const paymentMode=sale.payment_mode==="Online"
+ ? "ONLINE / UPI"
+ : String(sale.payment_mode||"Cash").toUpperCase();
 
   content.innerHTML=
    '<div class="invoice-shop-name">🛍 '+safe(shop?.name||"दुकान")+'</div>'+
@@ -1477,7 +1484,11 @@ async function openSaleDetails(saleId){
    '<div>Taxable Amount: <b>'+money(taxable)+'</b></div>'+
    '<div>GST Amount: <b>'+money(totalGST)+'</b></div>'+
    '<h3>Grand Total: '+money(grandTotal)+'</h3>'+
-   '</div>';
+'<hr>'+
+'<div>Payment Mode: <b>'+safe(paymentMode)+'</b></div>'+
+'<div>Received Amount: <b>'+money(receivedAmount)+'</b></div>'+
+'<div>Due Amount: <b>'+money(dueAmount)+'</b></div>'+
+'</div>';
 
  }catch(err){
   content.innerHTML='<p class="msg">Error: '+safe(err.message||err)+'</p>';
@@ -2214,6 +2225,9 @@ $("saveBillBtn").onclick=async()=>{
   const paymentStatus=$("paymentStatus").value;
 let receivedAmount=0;
  const paymentMode=$("paymentMode").value;
+  if(receivedAmount>total){
+  throw new Error("Received Amount कुल बिल से ज्यादा नहीं हो सकता।");
+  }
 
 if(paymentStatus==="Paid"){
   receivedAmount=total;
@@ -2285,14 +2299,17 @@ for (const [productId, qty] of stockCheck) {
     );
   }
 }
-  const invoice="VB-"+Date.now();
+  const balanceAmount=total-receivedAmount;
+const invoice="VB-"+Date.now();
 
-  const sale=await db.from("shop_sales").insert({
+const sale=await db.from("shop_sales").insert({
    shop_id:shopId,
    customer_id:customerId,
    invoice_no:invoice,
    total:total,
-   payment_mode:paymentMode
+   payment_mode:paymentMode,
+   received_amount:receivedAmount,
+   due_amount:balanceAmount
   }).select("id").single();
 
   if(sale.error)throw sale.error;
@@ -2333,7 +2350,7 @@ for (const [productId, qty] of stockCheck) {
 
   product.stock = newStock;
 }
-  const balanceAmount=total-receivedAmount;
+  
 
 if(balanceAmount>0){
   const dueResult=await db.from("shop_customer_dues").insert({
@@ -2353,7 +2370,7 @@ if(balanceAmount>0){
       due_id:dueResult.data.id,
       shop_id:shopId,
       amount:receivedAmount,
-      payment_mode:"Cash"
+      payment_mode:paymentMode
     });
 
     if(paymentResult.error)throw paymentResult.error;
