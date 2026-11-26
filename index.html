@@ -1407,6 +1407,7 @@ function renderSales(){
 async function openSaleDetails(saleId){
  const sale=sales.find(x=>x.id===saleId);
  if(!sale)return;
+ currentSaleId=saleId;
 
  const content=$("saleDetailContent");
  content.innerHTML='<p>Loading bill details...</p>';
@@ -1480,6 +1481,91 @@ async function openSaleDetails(saleId){
 
  }catch(err){
   content.innerHTML='<p class="msg">Error: '+safe(err.message||err)+'</p>';
+ }
+}
+
+async function loadHtml2Pdf(){
+ if(window.html2pdf)return;
+
+ await new Promise((resolve,reject)=>{
+  const script=document.createElement("script");
+  script.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+  script.onload=resolve;
+  script.onerror=reject;
+  document.head.appendChild(script);
+ });
+}
+
+async function createBillPDF(){
+ await loadHtml2Pdf();
+
+ const element=$("saleDetailContent");
+ const sale=sales.find(x=>x.id===currentSaleId);
+
+ const invoice=sale?.invoice_no||"Bill";
+ const filename=("Vyapar-Book-"+invoice).replace(/[^a-zA-Z0-9_-]/g,"_")+".pdf";
+
+ const worker=window.html2pdf()
+  .set({
+   margin:8,
+   filename:filename,
+   image:{type:"jpeg",quality:0.98},
+   html2canvas:{scale:2,useCORS:true},
+   jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
+  })
+  .from(element);
+
+ return {worker,filename};
+}
+
+async function downloadBillPDF(){
+ try{
+  const {worker}=await createBillPDF();
+  await worker.save();
+ }catch(err){
+  alert("PDF Error: "+(err.message||err));
+ }
+}
+
+async function shareBillWhatsApp(){
+ try{
+  const {worker,filename}=await createBillPDF();
+  const blob=await worker.outputPdf("blob");
+
+  const file=new File([blob],filename,{type:"application/pdf"});
+
+  if(navigator.share && navigator.canShare &&
+     navigator.canShare({files:[file]})){
+   await navigator.share({
+    files:[file],
+    title:"Bill PDF",
+    text:"Please find your bill attached."
+   });
+  }else{
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement("a");
+   a.href=url;
+   a.download=filename;
+   a.click();
+   URL.revokeObjectURL(url);
+
+   const sale=sales.find(x=>x.id===currentSaleId);
+   const customer=customers.find(c=>c.id===sale?.customer_id);
+   let phone=(customer?.phone||"").replace(/\D/g,"");
+
+   if(phone.length===10)phone="91"+phone;
+
+   const message="Your bill "+(sale?.invoice_no||"")+" is ready. Please find the PDF attached.";
+   const link=phone
+    ?"https://wa.me/"+phone+"?text="+encodeURIComponent(message)
+    :"https://wa.me/?text="+encodeURIComponent(message);
+
+   window.location.href=link;
+  }
+ }catch(err){
+  if(err.name!=="AbortError"){
+   alert("WhatsApp/PDF Error: "+(err.message||err));
+  }
  }
 }
 
